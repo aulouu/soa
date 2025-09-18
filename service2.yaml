@@ -16,11 +16,12 @@ paths:
       summary: Удалить из команды всех героев без зубочисток
       description: |
         Удаляет из команды всех героев, не имеющих зубочистки (hasToothpick = false или null).
+        Обязательная операция согласно заданию лабораторной работы.
         Операция выполняется через вызов API первого сервиса.
       parameters:
         - name: team-id
           in: path
-          description: team-id равен
+          description: Уникальный идентификатор команды
           required: true
           schema:
             type: integer
@@ -46,11 +47,12 @@ paths:
       description: |
         Пересаживает всех героев команды, не имеющих автомобиля (car = null),
         на красные "Lada Kalina" (устанавливает car.cool = true).
+        Обязательная операция согласно заданию лабораторной работы.
         Операция выполняется через вызов API первого сервиса.
       parameters:
         - name: team-id
           in: path
-          description: team-id равен
+          description: Уникальный идентификатор команды
           required: true
           schema:
             type: integer
@@ -58,7 +60,7 @@ paths:
             minimum: 1
       responses:
         '200':
-          description: Обновлённый список героев команды
+          description: Список героев команды
           content:
             application/xml:
               schema:

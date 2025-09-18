@@ -14,15 +14,15 @@ paths:
     get:
       summary: Получить список HumanBeing
       tags:
-       - Базовые операции
+        - Базовые операции
       description: |
         Возвращает массив объектов `HumanBeing`. 
         Поддерживается фильтрация по полям (`id`, `name`, `impactSpeed`, ...).
         Поля, управляющие выдачей: `page` (номер страницы, начиная с 0), `size` (размер страницы), `sort`.
       parameters:
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/size'
-        - $ref: '#/components/parameters/sort'
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/size"
+        - $ref: "#/components/parameters/sort"
         - name: id
           in: query
           description: id равен
@@ -67,30 +67,30 @@ paths:
           in: query
           description: weaponType равен
           schema:
-            $ref: '#/components/schemas/WeaponType'
+            $ref: "#/components/schemas/WeaponType"
         - name: mood
           in: query
           description: mood равен
           schema:
-            $ref: '#/components/schemas/Mood'
+            $ref: "#/components/schemas/Mood"
         - name: car-cool
           in: query
           description: car-cool равен
           schema:
             type: boolean
       responses:
-        '200':
+        "200":
           description: Список объектов HumanBeing (XML)
           content:
             application/xml:
               schema:
-                $ref: '#/components/schemas/HumanBeingList'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/InternalError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+                $ref: "#/components/schemas/HumanBeingList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
     post:
       summary: Добавить нового HumanBeing
@@ -104,22 +104,22 @@ paths:
         content:
           application/xml:
             schema:
-              $ref: '#/components/schemas/HumanBeing'
+              $ref: "#/components/schemas/HumanBeing"
       responses:
-        '201':
-          description: Объект создан. Возвращает созданный объект (XML).
+        "201":
+          description: Объект создан (XML).
           content:
             application/xml:
               schema:
-                $ref: '#/components/schemas/HumanBeing'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '422':
-          $ref: '#/components/responses/ValidationError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+                $ref: "#/components/schemas/HumanBeing"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
   /human-beings/{id}:
     get:
@@ -135,20 +135,20 @@ paths:
             format: int64
             minimum: 1
       responses:
-        '200':
+        "200":
           description: Объект найден (XML).
           content:
             application/xml:
               schema:
-                $ref: '#/components/schemas/HumanBeing'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/InternalError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+                $ref: "#/components/schemas/HumanBeing"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
     put:
       summary: Обновить HumanBeing по id
@@ -170,24 +170,24 @@ paths:
         content:
           application/xml:
             schema:
-              $ref: '#/components/schemas/HumanBeing'
+              $ref: "#/components/schemas/HumanBeing"
       responses:
-        '200':
-          description: Объект обновлён. Возвращает обновлённый объект (XML).
+        "200":
+          description: Объект обновлён (XML).
           content:
             application/xml:
               schema:
-                $ref: '#/components/schemas/HumanBeing'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/ValidationError'
-        '500':
-          $ref: '#/components/responses/InternalError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+                $ref: "#/components/schemas/HumanBeing"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
     delete:
       summary: Удалить HumanBeing по id
@@ -202,50 +202,79 @@ paths:
             format: int64
             minimum: 1
       responses:
-        '204':
+        "204":
           description: Объект удалён (нет содержимого).
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/InternalError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
-  /human-beings/mood/count-less:
+  /statistics/mood-count:
     get:
-      summary: Количество объектов, значение поля mood которых меньше заданного
+      summary: Статистика по настроениям - количество объектов с mood меньше заданного
       tags:
-        - Дополнительные операции
-      description: Возвращает количество объектов, значение поля mood которых меньше заданного
+        - Статистика
+      description: |
+        Возвращает количество объектов HumanBeing, значение поля mood которых меньше заданного.
+        Обязательная операция согласно заданию лабораторной работы.
       parameters:
         - name: threshold
           in: query
           required: true
-          description: Пороговое значение
+          description: Пороговое значение для сравнения mood
           schema:
             type: integer
+            minimum: 0
+            maximum: 3
+            example: 2
       responses:
-        '200':
+        "200":
           description: Количество объектов (XML)
           content:
             application/xml:
               schema:
-                $ref: '#/components/schemas/CountResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/InternalError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+                $ref: "#/components/schemas/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /statistics/impact-speeds:
+    get:
+      summary: Уникальные значения impactSpeed
+      tags:
+        - Статистика
+      description: |
+        Возвращает массив уникальных значений поля impactSpeed по всем объектам.
+        Обязательная операция согласно заданию лабораторной работы.
+      responses:
+        "200":
+          description: Массив уникальных значений impactSpeed (XML)
+          content:
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/ImpactSpeedList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
   /human-beings/name/starts-with:
     get:
       summary: Массив объектов, значение name которых начинается с заданной подстроки
       tags:
-        - Дополнительные операции
-      description: Возвращает список объектов `HumanBeing`, у которых поле `name` начинается с переданного префикса
+        - Статистика
+      description: |
+        Возвращает список объектов HumanBeing, у которых поле name начинается с переданного префикса.
+        Обязательная операция согласно заданию лабораторной работы.
       parameters:
         - name: prefix
           in: query
@@ -254,38 +283,18 @@ paths:
           schema:
             type: string
       responses:
-        '200':
+        "200":
           description: Список объектов (XML)
           content:
             application/xml:
               schema:
-                $ref: '#/components/schemas/HumanBeingList'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/InternalError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
-
-  /human-beings/impact-speed/unique:
-    get:
-      summary: Массив уникальных значений поля impactSpeed по всем объектам
-      tags:
-        - Дополнительные операции
-      description: Возвращает массив уникальных значений поля impactSpeed по всем объектам
-      responses:
-        '200':
-          description: Массив уникальных значений (XML)
-          content:
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/IntegerList'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/InternalError'
-        '503':
-          $ref: '#/components/responses/ServiceUnavailable'
+                $ref: "#/components/schemas/HumanBeingList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
 
 components:
   parameters:
@@ -320,7 +329,7 @@ components:
       content:
         application/xml:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error: 400
             message: Invalid parameters
@@ -329,7 +338,7 @@ components:
       content:
         application/xml:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error: 404
             message: Resource not found
@@ -338,7 +347,7 @@ components:
       content:
         application/xml:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error: 422
             message: impactSpeed must be greater than -422
@@ -347,7 +356,7 @@ components:
       content:
         application/xml:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error: 500
             message: Internal server error
@@ -356,7 +365,7 @@ components:
       content:
         application/xml:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             error: 503
             message: Database unavalible
@@ -378,7 +387,7 @@ components:
           minLength: 1
           description: "Не может быть null или пустой строки"
         coordinates:
-          $ref: '#/components/schemas/Coordinates'
+          $ref: "#/components/schemas/Coordinates"
         creationDate:
           type: string
           format: date-time
@@ -395,13 +404,13 @@ components:
           minimum: -441
           description: "Значение поля должно быть больше -442"
         weaponType:
-          $ref: '#/components/schemas/WeaponType'
+          $ref: "#/components/schemas/WeaponType"
           nullable: true
         mood:
-          $ref: '#/components/schemas/Mood'
+          $ref: "#/components/schemas/Mood"
           nullable: true
         car:
-          $ref: '#/components/schemas/Car'
+          $ref: "#/components/schemas/Car"
           nullable: true
       required:
         - name
@@ -430,11 +439,11 @@ components:
 
     WeaponType:
       type: string
-      enum: [ HAMMER, AXE, PISTOL, RIFLE, KNIFE ]
+      enum: [HAMMER, AXE, PISTOL, RIFLE, KNIFE]
 
     Mood:
       type: string
-      enum: [ SADNESS, SORROW, APATHY, FRENZY ]
+      enum: [SADNESS, SORROW, APATHY, FRENZY]
 
     Car:
       type: object
@@ -454,7 +463,7 @@ components:
         humanBeing:
           type: array
           items:
-            $ref: '#/components/schemas/HumanBeing'
+            $ref: "#/components/schemas/HumanBeing"
           xml:
             name: humanBeing
             wrapped: true
@@ -469,7 +478,7 @@ components:
         message:
           type: string
 
-    IntegerList:
+    ImpactSpeedList:
       type: object
       xml:
         name: impactSpeeds
@@ -478,6 +487,8 @@ components:
           type: array
           items:
             type: integer
+            format: int32
+            description: "Уникальное значение impactSpeed"
           xml:
             name: impactSpeed
             wrapped: true
@@ -490,6 +501,6 @@ components:
 
 tags:
   - name: Базовые операции
-    description: Операции над коллекцией HumanBeing
-  - name: Дополнительные операции
-    description: Специальные операции для анализа коллекции
+    description: CRUD операции над коллекцией HumanBeing
+  - name: Статистика
+    description: Статистические операции и анализ коллекции (требования лабораторной работы)
