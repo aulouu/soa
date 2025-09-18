@@ -30,13 +30,13 @@ paths:
         '204':
           description: Герои из команды удалены
         '400':
-          $ref: './service1.yaml#/components/responses/BadRequest'
+          $ref: '#/components/responses/BadRequest'
         '404':
-          $ref: './service1.yaml#/components/responses/NotFound'
+          $ref: '#/components/responses/NotFound'
         '500':
-          $ref: './service1.yaml#/components/responses/InternalError'
+          $ref: '#/components/responses/InternalError'
         '503':
-          $ref: './service1.yaml#/components/responses/ServiceUnavailable'
+          $ref: '#/components/responses/ServiceUnavailable'
 
   /team/{team-id}/car/add:
     post:
@@ -62,15 +62,150 @@ paths:
           content:
             application/xml:
               schema:
-                $ref: './service1.yaml#/components/schemas/HumanBeingList'
+                $ref: '#/components/schemas/HumanBeingList'
         '400':
-          $ref: './service1.yaml#/components/responses/BadRequest'
+          $ref: '#/components/responses/BadRequest'
         '404':
-          $ref: './service1.yaml#/components/responses/NotFound'
+          $ref: '#/components/responses/NotFound'
         '500':
-          $ref: './service1.yaml#/components/responses/InternalError'
+          $ref: '#/components/responses/InternalError'
         '503':
-          $ref: './service1.yaml#/components/responses/ServiceUnavailable'
+          $ref: '#/components/responses/ServiceUnavailable'
+
+components:
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalError:
+      description: Внутренняя ошибка сервера
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServiceUnavailable:
+      description: Сервис недоступен
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      xml:
+        name: error
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+
+    HumanBeing:
+      type: object
+      xml:
+        name: humanBeing
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+          readOnly: true
+          description: "Уникальный идентификатор (генерируется автоматически, > 0)"
+        name:
+          type: string
+          minLength: 1
+          description: "Не может быть null или пустой строки"
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+        creationDate:
+          type: string
+          format: date-time
+          readOnly: true
+          description: "Генерируется автоматически на сервере"
+        realHero:
+          type: boolean
+        hasToothpick:
+          type: boolean
+          nullable: true
+        impactSpeed:
+          type: integer
+          format: int32
+          minimum: -441
+          description: "Значение поля должно быть больше -442"
+        weaponType:
+          $ref: '#/components/schemas/WeaponType'
+          nullable: true
+        mood:
+          $ref: '#/components/schemas/Mood'
+          nullable: true
+        car:
+          $ref: '#/components/schemas/Car'
+          nullable: true
+      required:
+        - name
+        - coordinates
+        - creationDate
+        - realHero
+        - impactSpeed
+
+    Coordinates:
+      type: object
+      xml:
+        name: coordinates
+      properties:
+        x:
+          type: integer
+          format: int64
+          description: "Поле не может быть null"
+        y:
+          type: integer
+          format: int32
+          maximum: 507
+          description: "Максимальное значение поля: 507"
+      required:
+        - x
+        - y
+
+    WeaponType:
+      type: string
+      enum: [ HAMMER, AXE, PISTOL, RIFLE, KNIFE ]
+
+    Mood:
+      type: string
+      enum: [ SADNESS, SORROW, APATHY, FRENZY ]
+
+    Car:
+      type: object
+      xml:
+        name: car
+      properties:
+        cool:
+          type: boolean
+      required:
+        - cool
+
+    HumanBeingList:
+      type: object
+      xml:
+        name: humanBeings
+      properties:
+        humanBeing:
+          type: array
+          items:
+            $ref: '#/components/schemas/HumanBeing'
+          xml:
+            name: humanBeing
+            wrapped: true
 
 tags:
   - name: Операции с командами
