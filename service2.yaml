@@ -1,0 +1,77 @@
+openapi: 3.0.3
+info:
+  title: HumanBeing Collection API 2
+  version: "1.0.0"
+  description: |
+    RESTful API второй сервис для управления героями и командами.
+    - Все объекты передаются и возвращаются в формате XML (`application/xml`).
+    - Сервис взаимодействует с первым сервисом (`HumanBeing Collection API`).
+servers:
+  - url: http://localhost:2468/api/heroes
+paths:
+  /team/{team-id}/remove-without-toothpick:
+    delete:
+      tags:
+        - Операции с командами
+      summary: Удалить из команды всех героев без зубочисток
+      description: |
+        Удаляет из команды всех героев, не имеющих зубочистки (hasToothpick = false или null).
+        Операция выполняется через вызов API первого сервиса.
+      parameters:
+        - name: team-id
+          in: path
+          description: team-id равен
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '204':
+          description: Герои из команды удалены
+        '400':
+          $ref: './service1.yaml#/components/responses/BadRequest'
+        '404':
+          $ref: './service1.yaml#/components/responses/NotFound'
+        '500':
+          $ref: './service1.yaml#/components/responses/InternalError'
+        '503':
+          $ref: './service1.yaml#/components/responses/ServiceUnavailable'
+
+  /team/{team-id}/car/add:
+    post:
+      summary: Пересадить всех героев команды, не имеющих автомобиля, на красные "Lada Kalina"
+      tags:
+        - Операции с командами
+      description: |
+        Пересаживает всех героев команды, не имеющих автомобиля (car = null),
+        на красные "Lada Kalina" (устанавливает car.cool = true).
+        Операция выполняется через вызов API первого сервиса.
+      parameters:
+        - name: team-id
+          in: path
+          description: team-id равен
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Обновлённый список героев команды
+          content:
+            application/xml:
+              schema:
+                $ref: './service1.yaml#/components/schemas/HumanBeingList'
+        '400':
+          $ref: './service1.yaml#/components/responses/BadRequest'
+        '404':
+          $ref: './service1.yaml#/components/responses/NotFound'
+        '500':
+          $ref: './service1.yaml#/components/responses/InternalError'
+        '503':
+          $ref: './service1.yaml#/components/responses/ServiceUnavailable'
+
+tags:
+  - name: Операции с командами
+    description: Дополнительные операции, выполняемые над героями в составе команды

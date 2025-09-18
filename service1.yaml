@@ -1,0 +1,495 @@
+openapi: 3.0.3
+info:
+  title: HumanBeing Collection API
+  version: "1.0.0"
+  description: |
+    RESTful API для управления коллекцией объектов `HumanBeing`.
+    - Все объекты передаются и возвращаются в формате XML (`application/xml`).
+    - Параметры фильтрации, сортировки и постраничной навигации передаются через URL query-параметры.
+    - При нарушении ограничений целостности возвращаются соответствующие HTTP-коды ошибок.
+servers:
+  - url: http://localhost:2468/api
+paths:
+  /human-beings:
+    get:
+      summary: Получить список HumanBeing
+      tags:
+       - Базовые операции
+      description: |
+        Возвращает массив объектов `HumanBeing`. 
+        Поддерживается фильтрация по полям (`id`, `name`, `impactSpeed`, ...).
+        Поля, управляющие выдачей: `page` (номер страницы, начиная с 0), `size` (размер страницы), `sort`.
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+        - name: id
+          in: query
+          description: id равен
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+        - name: name
+          in: query
+          description: name равен
+          schema:
+            type: string
+        - name: coordinates-x
+          in: query
+          description: coordinates-x равен (long)
+          schema:
+            type: integer
+            format: int64
+        - name: coordinates-y
+          in: query
+          description: coordinates-y равен
+          schema:
+            type: integer
+            format: int32
+        - name: realHero
+          in: query
+          description: realHero равен
+          schema:
+            type: boolean
+        - name: hasToothpick
+          in: query
+          description: hasToothpick равен
+          schema:
+            type: boolean
+        - name: impactSpeed
+          in: query
+          description: impactSpeed равен
+          schema:
+            type: integer
+            minimum: -441
+        - name: weaponType
+          in: query
+          description: weaponType равен
+          schema:
+            $ref: '#/components/schemas/WeaponType'
+        - name: mood
+          in: query
+          description: mood равен
+          schema:
+            $ref: '#/components/schemas/Mood'
+        - name: car-cool
+          in: query
+          description: car-cool равен
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Список объектов HumanBeing (XML)
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/HumanBeingList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+    post:
+      summary: Добавить нового HumanBeing
+      tags:
+        - Базовые операции
+      description: |
+        Создаёт новый `HumanBeing`. Тело запроса — XML-представление объекта.
+        Поля `id` и `creationDate` генерируются сервером (readOnly). Остальные поля проверяются по ограничениям.
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/HumanBeing'
+      responses:
+        '201':
+          description: Объект создан. Возвращает созданный объект (XML).
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/HumanBeing'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /human-beings/{id}:
+    get:
+      summary: Получить HumanBeing по id
+      tags:
+        - Базовые операции
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '200':
+          description: Объект найден (XML).
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/HumanBeing'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+    put:
+      summary: Обновить HumanBeing по id
+      tags:
+        - Базовые операции
+      description: |
+        Обновляет существующий объект. Id из пути указывает на обновляемый ресурс.
+        Тело запроса — XML с новой версией объекта.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      requestBody:
+        required: true
+        content:
+          application/xml:
+            schema:
+              $ref: '#/components/schemas/HumanBeing'
+      responses:
+        '200':
+          description: Объект обновлён. Возвращает обновлённый объект (XML).
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/HumanBeing'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+    delete:
+      summary: Удалить HumanBeing по id
+      tags:
+        - Базовые операции
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '204':
+          description: Объект удалён (нет содержимого).
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /human-beings/mood/count-less:
+    get:
+      summary: Количество объектов, значение поля mood которых меньше заданного
+      tags:
+        - Дополнительные операции
+      description: Возвращает количество объектов, значение поля mood которых меньше заданного
+      parameters:
+        - name: threshold
+          in: query
+          required: true
+          description: Пороговое значение
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Количество объектов (XML)
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/CountResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /human-beings/name/starts-with:
+    get:
+      summary: Массив объектов, значение name которых начинается с заданной подстроки
+      tags:
+        - Дополнительные операции
+      description: Возвращает список объектов `HumanBeing`, у которых поле `name` начинается с переданного префикса
+      parameters:
+        - name: prefix
+          in: query
+          required: true
+          description: Подстрока-префикс
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список объектов (XML)
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/HumanBeingList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+  /human-beings/impact-speed/unique:
+    get:
+      summary: Массив уникальных значений поля impactSpeed по всем объектам
+      tags:
+        - Дополнительные операции
+      description: Возвращает массив уникальных значений поля impactSpeed по всем объектам
+      responses:
+        '200':
+          description: Массив уникальных значений (XML)
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/IntegerList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+
+components:
+  parameters:
+    page:
+      name: page
+      in: query
+      description: Номер страницы (начиная с 0)
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    size:
+      name: size
+      in: query
+      description: Размер страницы (количество элементов на странице)
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 1000
+        default: 20
+    sort:
+      name: sort
+      in: query
+      description: |
+        Поле(я) для сортировки. Формат: field[,field2[:desc|asc],...]
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 400
+            message: Invalid parameters
+    NotFound:
+      description: Ресурс не найден
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 404
+            message: Resource not found
+    ValidationError:
+      description: Ошибка валидации данных
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 422
+            message: impactSpeed must be greater than -422
+    InternalError:
+      description: Внутренняя ошибка сервера
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 500
+            message: Internal server error
+    ServiceUnavailable:
+      description: БД недоступна в данный момент
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: 503
+            message: Database unavalible
+
+  schemas:
+    HumanBeing:
+      type: object
+      xml:
+        name: humanBeing
+      properties:
+        id:
+          type: integer
+          format: int64
+          minimum: 1
+          readOnly: true
+          description: "Уникальный идентификатор (генерируется автоматически, > 0)"
+        name:
+          type: string
+          minLength: 1
+          description: "Не может быть null или пустой строки"
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+        creationDate:
+          type: string
+          format: date-time
+          readOnly: true
+          description: "Генерируется автоматически на сервере"
+        realHero:
+          type: boolean
+        hasToothpick:
+          type: boolean
+          nullable: true
+        impactSpeed:
+          type: integer
+          format: int32
+          minimum: -441
+          description: "Значение поля должно быть больше -442"
+        weaponType:
+          $ref: '#/components/schemas/WeaponType'
+          nullable: true
+        mood:
+          $ref: '#/components/schemas/Mood'
+          nullable: true
+        car:
+          $ref: '#/components/schemas/Car'
+          nullable: true
+      required:
+        - name
+        - coordinates
+        - creationDate
+        - realHero
+        - impactSpeed
+
+    Coordinates:
+      type: object
+      xml:
+        name: coordinates
+      properties:
+        x:
+          type: integer
+          format: int64
+          description: "Поле не может быть null"
+        y:
+          type: integer
+          format: int32
+          maximum: 507
+          description: "Максимальное значение поля: 507"
+      required:
+        - x
+        - y
+
+    WeaponType:
+      type: string
+      enum: [ HAMMER, AXE, PISTOL, RIFLE, KNIFE ]
+
+    Mood:
+      type: string
+      enum: [ SADNESS, SORROW, APATHY, FRENZY ]
+
+    Car:
+      type: object
+      xml:
+        name: car
+      properties:
+        cool:
+          type: boolean
+      required:
+        - cool
+
+    HumanBeingList:
+      type: object
+      xml:
+        name: humanBeings
+      properties:
+        humanBeing:
+          type: array
+          items:
+            $ref: '#/components/schemas/HumanBeing'
+          xml:
+            name: humanBeing
+            wrapped: true
+
+    Error:
+      type: object
+      xml:
+        name: error
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+
+    IntegerList:
+      type: object
+      xml:
+        name: impactSpeeds
+      properties:
+        impactSpeed:
+          type: array
+          items:
+            type: integer
+          xml:
+            name: impactSpeed
+            wrapped: true
+
+    CountResponse:
+      type: integer
+      xml:
+        name: count
+      example: 65
+
+tags:
+  - name: Базовые операции
+    description: Операции над коллекцией HumanBeing
+  - name: Дополнительные операции
+    description: Специальные операции для анализа коллекции
