@@ -4,7 +4,7 @@ info:
   version: "1.0.0"
   description: |
     RESTful API для управления коллекцией объектов `HumanBeing`.
-    - Все объекты передаются и возвращаются в формате XML (`application/xml`).
+    - Все объекты передаются и возвращаются в формате JSON (`application/json`).
     - Параметры фильтрации, сортировки и постраничной навигации передаются через URL query-параметры.
     - При нарушении ограничений целостности возвращаются соответствующие HTTP-коды ошибок.
 servers:
@@ -80,9 +80,9 @@ paths:
             type: boolean
       responses:
         "200":
-          description: Список объектов HumanBeing (XML)
+          description: Список объектов HumanBeing (JSON)
           content:
-            application/xml:
+            application/json:
               schema:
                 $ref: "#/components/schemas/HumanBeingList"
         "400":
@@ -97,19 +97,19 @@ paths:
       tags:
         - Базовые операции
       description: |
-        Создаёт новый `HumanBeing`. Тело запроса — XML-представление объекта.
+        Создаёт новый `HumanBeing`. Тело запроса — JSON-представление объекта.
         Поля `id` и `creationDate` генерируются сервером (readOnly). Остальные поля проверяются по ограничениям.
       requestBody:
         required: true
         content:
-          application/xml:
+          application/json:
             schema:
               $ref: "#/components/schemas/HumanBeing"
       responses:
         "201":
-          description: Объект создан (XML).
+          description: Объект создан (JSON).
           content:
-            application/xml:
+            application/json:
               schema:
                 $ref: "#/components/schemas/HumanBeing"
         "400":
@@ -136,9 +136,9 @@ paths:
             minimum: 1
       responses:
         "200":
-          description: Объект найден (XML).
+          description: Объект найден (JSON).
           content:
-            application/xml:
+            application/json:
               schema:
                 $ref: "#/components/schemas/HumanBeing"
         "404":
@@ -156,7 +156,7 @@ paths:
         - Базовые операции
       description: |
         Обновляет существующий объект. Id из пути указывает на обновляемый ресурс.
-        Тело запроса — XML с новой версией объекта.
+        Тело запроса — JSON с новой версией объекта.
       parameters:
         - name: id
           in: path
@@ -168,14 +168,14 @@ paths:
       requestBody:
         required: true
         content:
-          application/xml:
+          application/json:
             schema:
               $ref: "#/components/schemas/HumanBeing"
       responses:
         "200":
-          description: Объект обновлён (XML).
+          description: Объект обновлён (JSON).
           content:
-            application/xml:
+            application/json:
               schema:
                 $ref: "#/components/schemas/HumanBeing"
         "400":
@@ -233,9 +233,9 @@ paths:
             example: 2
       responses:
         "200":
-          description: Количество объектов (XML)
+          description: Количество объектов (JSON)
           content:
-            application/xml:
+            application/json:
               schema:
                 $ref: "#/components/schemas/CountResponse"
         "400":
@@ -255,13 +255,11 @@ paths:
         Обязательная операция согласно заданию лабораторной работы.
       responses:
         "200":
-          description: Массив уникальных значений impactSpeed (XML)
+          description: Массив уникальных значений impactSpeed (JSON)
           content:
-            application/xml:
+            application/json:
               schema:
                 $ref: "#/components/schemas/ImpactSpeedList"
-        "400":
-          $ref: "#/components/responses/BadRequest"
         "500":
           $ref: "#/components/responses/InternalError"
         "503":
@@ -284,9 +282,9 @@ paths:
             type: string
       responses:
         "200":
-          description: Список объектов (XML)
+          description: Список объектов (JSON)
           content:
-            application/xml:
+            application/json:
               schema:
                 $ref: "#/components/schemas/HumanBeingList"
         "400":
@@ -327,7 +325,7 @@ components:
     BadRequest:
       description: Некорректный запрос
       content:
-        application/xml:
+        application/json:
           schema:
             $ref: "#/components/schemas/Error"
           example:
@@ -336,7 +334,7 @@ components:
     NotFound:
       description: Ресурс не найден
       content:
-        application/xml:
+        application/json:
           schema:
             $ref: "#/components/schemas/Error"
           example:
@@ -345,7 +343,7 @@ components:
     ValidationError:
       description: Ошибка валидации данных
       content:
-        application/xml:
+        application/json:
           schema:
             $ref: "#/components/schemas/Error"
           example:
@@ -354,7 +352,7 @@ components:
     InternalError:
       description: Внутренняя ошибка сервера
       content:
-        application/xml:
+        application/json:
           schema:
             $ref: "#/components/schemas/Error"
           example:
@@ -363,7 +361,7 @@ components:
     ServiceUnavailable:
       description: БД недоступна в данный момент
       content:
-        application/xml:
+        application/json:
           schema:
             $ref: "#/components/schemas/Error"
           example:
@@ -373,8 +371,6 @@ components:
   schemas:
     HumanBeing:
       type: object
-      xml:
-        name: humanBeing
       properties:
         id:
           type: integer
@@ -421,8 +417,6 @@ components:
 
     Coordinates:
       type: object
-      xml:
-        name: coordinates
       properties:
         x:
           type: integer
@@ -439,16 +433,14 @@ components:
 
     WeaponType:
       type: string
-      enum: [HAMMER, AXE, PISTOL, RIFLE, KNIFE]
+      enum: [ HAMMER, AXE, PISTOL, RIFLE, KNIFE ]
 
     Mood:
       type: string
-      enum: [SADNESS, SORROW, APATHY, FRENZY]
+      enum: [ SADNESS, SORROW, APATHY, FRENZY ]
 
     Car:
       type: object
-      xml:
-        name: car
       properties:
         cool:
           type: boolean
@@ -457,21 +449,14 @@ components:
 
     HumanBeingList:
       type: object
-      xml:
-        name: humanBeings
       properties:
-        humanBeing:
+        humanBeings:
           type: array
           items:
             $ref: "#/components/schemas/HumanBeing"
-          xml:
-            name: humanBeing
-            wrapped: true
 
     Error:
       type: object
-      xml:
-        name: error
       properties:
         code:
           type: integer
@@ -480,24 +465,20 @@ components:
 
     ImpactSpeedList:
       type: object
-      xml:
-        name: impactSpeeds
       properties:
-        impactSpeed:
+        impactSpeeds:
           type: array
           items:
             type: integer
             format: int32
             description: "Уникальное значение impactSpeed"
-          xml:
-            name: impactSpeed
-            wrapped: true
 
     CountResponse:
-      type: integer
-      xml:
-        name: count
-      example: 65
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 65
 
 tags:
   - name: Базовые операции

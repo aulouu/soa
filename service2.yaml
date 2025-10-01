@@ -4,7 +4,7 @@ info:
   version: "1.0.0"
   description: |
     RESTful API второй сервис для управления героями и командами.
-    - Все объекты передаются и возвращаются в формате XML (`application/xml`).
+    - Все объекты передаются и возвращаются в формате JSON (`application/json`).
     - Сервис взаимодействует с первым сервисом (`HumanBeing Collection API`).
 servers:
   - url: http://localhost:2468/api/heroes
@@ -62,7 +62,7 @@ paths:
         '200':
           description: Список героев команды
           content:
-            application/xml:
+            application/json:
               schema:
                 $ref: '#/components/schemas/HumanBeingList'
         '400':
@@ -79,33 +79,31 @@ components:
     BadRequest:
       description: Некорректный запрос
       content:
-        application/xml:
+        application/json:
           schema:
             $ref: '#/components/schemas/Error'
     NotFound:
       description: Ресурс не найден
       content:
-        application/xml:
+        application/json:
           schema:
             $ref: '#/components/schemas/Error'
     InternalError:
       description: Внутренняя ошибка сервера
       content:
-        application/xml:
+        application/json:
           schema:
             $ref: '#/components/schemas/Error'
     ServiceUnavailable:
       description: Сервис недоступен
       content:
-        application/xml:
+        application/json:
           schema:
             $ref: '#/components/schemas/Error'
 
   schemas:
     Error:
       type: object
-      xml:
-        name: error
       properties:
         code:
           type: integer
@@ -114,8 +112,6 @@ components:
 
     HumanBeing:
       type: object
-      xml:
-        name: humanBeing
       properties:
         id:
           type: integer
@@ -162,8 +158,6 @@ components:
 
     Coordinates:
       type: object
-      xml:
-        name: coordinates
       properties:
         x:
           type: integer
@@ -188,8 +182,6 @@ components:
 
     Car:
       type: object
-      xml:
-        name: car
       properties:
         cool:
           type: boolean
@@ -198,16 +190,11 @@ components:
 
     HumanBeingList:
       type: object
-      xml:
-        name: humanBeings
       properties:
-        humanBeing:
+        humanBeings:
           type: array
           items:
             $ref: '#/components/schemas/HumanBeing'
-          xml:
-            name: humanBeing
-            wrapped: true
 
 tags:
   - name: Операции с командами
