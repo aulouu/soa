@@ -2,23 +2,80 @@ import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-export default function HumanBeingTable({ data, onEdit, onDelete, formatDate }) {
+export default function HumanBeingTable({ data, onEdit, onDelete, formatDate, sortKey, sortDirection, onSort }) {
+    const renderSortArrow = (key) => sortKey === key ? (sortDirection === 'asc' ? '▲' : '▼') : '';
+
     return (
         <TableContainer component={Paper} elevation={1}>
             <Table sx={{ minWidth: 650 }}>
                 <TableHead>
                     <TableRow sx={{ bgcolor: "primary.main" }}>
-                        <TableCell sx={{ color: "white", fontWeight: 600 }}>ID</TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: 600 }}>Name</TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: 600 }}>X</TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: 600 }}>Y</TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: 600 }}>Creation Date</TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: 600 }}>Real Hero</TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: 600 }}>Has Toothpick</TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: 600 }}>Impact Speed</TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: 600 }}>Weapon Type</TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: 600 }}>Mood</TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: 600 }}>Car Cool</TableCell>
+                        <TableCell
+                            sx={{ color: "white", fontWeight: 600, cursor: 'pointer' }}
+                            onClick={() => onSort('id')}
+                        >
+                            ID {renderSortArrow('id')}
+                        </TableCell>
+                        <TableCell
+                            sx={{ color: "white", fontWeight: 600, cursor: "pointer" }}
+                            onClick={() => onSort('name')}
+                        >
+                            Name {renderSortArrow('name')}
+                        </TableCell>
+                        <TableCell
+                            sx={{ color: "white", fontWeight: 600, cursor: "pointer" }}
+                            onClick={() => onSort('coordinates.x')}
+                        >
+                            X {renderSortArrow('coordinates.x')}
+                        </TableCell>
+                        <TableCell
+                            sx={{ color: "white", fontWeight: 600, cursor: "pointer" }}
+                            onClick={() => onSort('coordinates.y')}
+                        >
+                            Y {renderSortArrow('coordinates.y')}
+                        </TableCell>
+                        <TableCell
+                            sx={{ color: "white", fontWeight: 600, cursor: "pointer" }}
+                            onClick={() => onSort('creationDate')}
+                        >
+                            Creation Date {renderSortArrow('creationDate')}
+                        </TableCell>
+                        <TableCell
+                            sx={{ color: "white", fontWeight: 600, cursor: "pointer" }}
+                            onClick={() => onSort('realHero')}
+                        >
+                            Real Hero {renderSortArrow('realHero')}
+                        </TableCell>
+                        <TableCell
+                            sx={{ color: "white", fontWeight: 600, cursor: "pointer" }}
+                            onClick={() => onSort('hasToothpick')}
+                        >
+                            Has Toothpick {renderSortArrow('hasToothpick')}
+                        </TableCell>
+                        <TableCell
+                            sx={{ color: "white", fontWeight: 600, cursor: "pointer" }}
+                            onClick={() => onSort('impactSpeed')}
+                        >
+                            Impact Speed {renderSortArrow('impactSpeed')}
+                        </TableCell>
+                        <TableCell
+                            sx={{ color: "white", fontWeight: 600, cursor: "pointer" }}
+                            onClick={() => onSort('weaponType')}
+                        >
+                            Weapon Type {renderSortArrow('weaponType')}
+                        </TableCell>
+                        <TableCell
+                            sx={{ color: "white", fontWeight: 600, cursor: "pointer" }}
+                            onClick={() => onSort('mood')}
+                        >
+                            Mood {renderSortArrow('mood')}
+                        </TableCell>
+                        <TableCell
+                            sx={{ color: "white", fontWeight: 600, cursor: "pointer" }}
+                            onClick={() => onSort('car.cool')}
+                        >
+                            Car Cool {renderSortArrow('car.cool')}
+                        </TableCell>
                         <TableCell sx={{ color: "white", fontWeight: 600 }} align="right"></TableCell>
                     </TableRow>
                 </TableHead>

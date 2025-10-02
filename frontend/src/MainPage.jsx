@@ -51,18 +51,20 @@ export default function MainPage() {
     const [operationResult, setOperationResult] = useState(null);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [sortKey, setSortKey] = useState(null);
+    const [sortDirection, setSortDirection] = useState('asc');
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
         loadHumanBeingsPage(0);
     }, []);
-
-    const loadHumanBeingsPage = async (pageNumber = 0) => {
+    
+    const loadHumanBeingsPage = async (pageNumber = 0, sortField = sortKey, sortDir = sortDirection) => {
         setIsLoading(true);
         setHasError(false);
         try {
-            const data = await fetchAllHumanBeings(pageNumber, PAGE_SIZE);
+            const data = await fetchAllHumanBeings(pageNumber, PAGE_SIZE, sortField, sortDir);
             setHumanBeings(data.content);
             setFilteredHumanBeings(data.content);
             setTotalPages(data.totalPages);
@@ -74,6 +76,31 @@ export default function MainPage() {
         } finally {
             setIsLoading(false);
         }
+    };
+    
+    const handleSort = (key) => {
+        let newDirection = 'asc';
+        if (sortKey === key) {
+            newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        }
+        setSortKey(key);
+        setSortDirection(newDirection);
+        const sortedData = [...filteredHumanBeings].sort((a, b) => {
+            const getValue = (obj, key) => key.split('.').reduce((o, k) => o?.[k], obj);
+            const aVal = getValue(a, key);
+            const bVal = getValue(b, key);
+
+            if (aVal === null || aVal === undefined) return 1;
+            if (bVal === null || bVal === undefined) return -1;
+            if (typeof aVal === 'number' && typeof bVal === 'number') {
+                return newDirection === 'asc' ? aVal - bVal : bVal - aVal;
+            }
+
+            return newDirection === 'asc'
+                ? String(aVal).localeCompare(String(bVal))
+                : String(bVal).localeCompare(String(aVal));
+        });
+        setFilteredHumanBeings(sortedData);
     };
 
     const formatDateForDisplay = (dateString) => {
@@ -495,6 +522,9 @@ export default function MainPage() {
                     onEdit={handleOpenEditDialog}
                     onDelete={handleDelete}
                     formatDate={formatDateForDisplay}
+                    sortKey={sortKey}
+                    sortDirection={sortDirection}
+                    onSort={handleSort}
                 />
             )}
 

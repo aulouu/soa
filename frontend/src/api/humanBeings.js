@@ -1,8 +1,17 @@
 const BASE_URL = 'http://localhost:2468/api/human-beings';
 const STATISTICS_URL = 'http://localhost:2468/api/statistics';
 
-export const fetchAllHumanBeings = async (page = 0, size = 10) => {
-    const res = await fetch(`${BASE_URL}?page=${page}&size=${size}`);
+// export const fetchAllHumanBeings = async (page = 0, size = 10) => {
+//     const res = await fetch(`${BASE_URL}?page=${page}&size=${size}`);
+//     if (!res.ok) throw new Error("Failed to fetch human beings");
+//     return res.json();
+// };
+export const fetchAllHumanBeings = async (page = 0, size = 10, sortField = null, sortDir = 'asc') => {
+    let url = `${BASE_URL}?page=${page}&size=${size}`;
+    if (sortField) {
+        url += `&sort=${sortField},${sortDir}`;
+    }
+    const res = await fetch(url);
     if (!res.ok) throw new Error("Failed to fetch human beings");
     return res.json();
 };
