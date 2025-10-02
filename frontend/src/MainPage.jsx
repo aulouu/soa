@@ -1,18 +1,8 @@
 "use client"
 
-import { useState, useEffect } from "react";
-import {
-    Box,
-    Button,
-    TextField,
-    IconButton,
-    Typography,
-    ThemeProvider,
-    Alert,
-    Chip,
-    Pagination
-} from "@mui/material";
-import { ToastContainer, toast } from "react-toastify";
+import {useEffect, useState} from "react";
+import {Alert, Box, Button, Chip, CircularProgress, IconButton, Pagination, TextField, Typography} from "@mui/material";
+import {toast} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
 import AddIcon from "@mui/icons-material/Add";
@@ -21,16 +11,15 @@ import NumbersIcon from "@mui/icons-material/Numbers";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import SpeedIcon from "@mui/icons-material/Speed";
 
-import theme from "./theme";
 import {
+    addHumanBeing,
+    countByMood,
+    deleteHumanBeing,
     fetchAllHumanBeings,
     fetchHumanBeingById,
-    addHumanBeing,
-    updateHumanBeing,
-    deleteHumanBeing,
-    countByMood,
     filterByNamePrefix,
-    getUniqueImpactSpeeds
+    getUniqueImpactSpeeds,
+    updateHumanBeing
 } from "./api/humanBeings";
 import HumanBeingTable from "./components/HumanBeingTable";
 import HumanBeingDialog from "./components/HumanBeingDialog";
@@ -48,13 +37,13 @@ export default function MainPage() {
     const [currentItem, setCurrentItem] = useState({
         id: "",
         name: "",
-        coordinates: { x: "", y: "" },
+        coordinates: {x: "", y: ""},
         realHero: false,
         hasToothpick: false,
         impactSpeed: "",
         weaponType: "",
         mood: "",
-        car: { cool: false }
+        car: {cool: false}
     });
     const [moodValue, setMoodValue] = useState("");
     const [namePrefix, setNamePrefix] = useState("");
@@ -62,12 +51,16 @@ export default function MainPage() {
     const [operationResult, setOperationResult] = useState(null);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [isLoading, setIsLoading] = useState(false);
+    const [hasError, setHasError] = useState(false);
 
     useEffect(() => {
         loadHumanBeingsPage(0);
     }, []);
 
     const loadHumanBeingsPage = async (pageNumber = 0) => {
+        setIsLoading(true);
+        setHasError(false);
         try {
             const data = await fetchAllHumanBeings(pageNumber, PAGE_SIZE);
             setHumanBeings(data.content);
@@ -76,7 +69,10 @@ export default function MainPage() {
             setPage(data.number);
         } catch (error) {
             console.error(error);
-            toast.error(error.message);
+            setHasError(true);
+            toast.error("Error loading data from the server");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -94,13 +90,13 @@ export default function MainPage() {
             const key = field.split(".")[1];
             setCurrentItem(prev => ({
                 ...prev,
-                coordinates: { ...prev.coordinates, [key]: Number(value) }
+                coordinates: {...prev.coordinates, [key]: Number(value)}
             }));
         } else if (field.startsWith("car.")) {
             const key = field.split(".")[1];
             setCurrentItem(prev => ({
                 ...prev,
-                car: { ...prev.car, [key]: value }
+                car: {...prev.car, [key]: value}
             }));
         } else {
             setCurrentItem(prev => ({
@@ -111,7 +107,7 @@ export default function MainPage() {
     };
 
     const validateHumanBeingForm = () => {
-        const { name, coordinates, impactSpeed, weaponType, mood } = currentItem;
+        const {name, coordinates, impactSpeed, weaponType, mood} = currentItem;
 
         if (!name || !name.trim()) {
             toast.error("Name cannot be empty");
@@ -151,7 +147,7 @@ export default function MainPage() {
                 },
                 weaponType: currentItem.weaponType || null,
                 mood: currentItem.mood || null,
-                car: { cool: currentItem.car.cool }
+                car: {cool: currentItem.car.cool}
             });
             toast.success("HumanBeing added successfully");
             handleCloseDialog();
@@ -172,7 +168,7 @@ export default function MainPage() {
                 },
                 weaponType: currentItem.weaponType || null,
                 mood: currentItem.mood || null,
-                car: { cool: currentItem.car.cool }
+                car: {cool: currentItem.car.cool}
             });
             toast.success("HumanBeing updated successfully");
             handleCloseDialog();
@@ -197,13 +193,13 @@ export default function MainPage() {
         setCurrentItem({
             id: "",
             name: "",
-            coordinates: { x: "", y: "" },
+            coordinates: {x: "", y: ""},
             realHero: false,
             hasToothpick: false,
             impactSpeed: "",
             weaponType: "",
             mood: "",
-            car: { cool: false }
+            car: {cool: false}
         });
         setOpenDialog(true);
     };
@@ -213,13 +209,13 @@ export default function MainPage() {
         setCurrentItem({
             id: item.id,
             name: item.name,
-            coordinates: { x: item.coordinates?.x || "", y: item.coordinates?.y || "" },
+            coordinates: {x: item.coordinates?.x || "", y: item.coordinates?.y || ""},
             realHero: item.realHero,
             hasToothpick: item.hasToothpick,
             impactSpeed: item.impactSpeed,
             weaponType: item.weaponType,
             mood: item.mood,
-            car: { cool: item.car?.cool || false }
+            car: {cool: item.car?.cool || false}
         });
         setOpenDialog(true);
     };
@@ -231,12 +227,18 @@ export default function MainPage() {
             setFilteredHumanBeings(humanBeings);
             return;
         }
+        setIsLoading(true);
+        setHasError(false);
         try {
             const data = await fetchHumanBeingById(searchId.trim());
             setFilteredHumanBeings([data]);
         } catch (error) {
-            setFilteredHumanBeings([]);
             console.error(error.message);
+            setFilteredHumanBeings([]);
+            setHasError(true);
+            toast.error("Error loading data from the server");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -255,6 +257,8 @@ export default function MainPage() {
             toast.error("Invalid mood number. Must be 0, 1, 2, 3");
             return;
         }
+        setIsLoading(true);
+        setHasError(false);
         try {
             const count = await countByMood(idx);
             setOperationResult({
@@ -263,12 +267,18 @@ export default function MainPage() {
                 moodValueAtQuery: moodValue
             });
         } catch (error) {
-            toast.error(error.message);
+            console.error(error);
+            setHasError(true);
+            toast.error("Error loading data from the server");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleFilterByName = async () => {
         if (!namePrefix.trim()) return;
+        setIsLoading(true);
+        setHasError(false);
         try {
             const data = await filterByNamePrefix(namePrefix);
             setFilteredHumanBeings(data);
@@ -279,6 +289,10 @@ export default function MainPage() {
             });
         } catch (error) {
             console.error(error);
+            setHasError(true);
+            toast.error("Error loading data from the server");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -289,171 +303,203 @@ export default function MainPage() {
     };
 
     const handleGetUniqueSpeeds = async () => {
+        setIsLoading(true);
+        setHasError(false);
         try {
             const data = await getUniqueImpactSpeeds();
             setUniqueSpeeds(data);
-            setOperationResult({ type: "speeds", value: data });
+            setOperationResult({type: "speeds", value: data});
         } catch (error) {
             console.error(error);
+            setHasError(true);
+            toast.error("Error loading data from the server");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <ThemeProvider theme={theme}>
-            <ToastContainer />
-            <Box sx={{ p: 4, minHeight: "100vh", bgcolor: "background.default" }}>
+        <Box sx={{p: 4, minHeight: "100vh", bgcolor: "background.default"}}>
 
-                <Box sx={{ mb: 3, display: "flex", alignItems: "center", position: "relative" }}>
-                    <Typography variant="h4" sx={{ color: "primary.main", fontWeight: 600 }}>Human Beings</Typography>
+            <Box sx={{mb: 3, display: "flex", alignItems: "center", position: "relative"}}>
+                <Typography variant="h4" sx={{color: "primary.main", fontWeight: 600}}>Human Beings</Typography>
 
-                    <Box
-                        sx={{
-                            display: "flex",
-                            gap: 2,
-                            alignItems: "center",
-                            position: "absolute",
-                            left: "50%",
-                            transform: "translateX(-50%)"
+                <Box
+                    sx={{
+                        display: "flex",
+                        gap: 2,
+                        alignItems: "center",
+                        position: "absolute",
+                        left: "50%",
+                        transform: "translateX(-50%)"
+                    }}
+                >
+                    <TextField
+                        label="Search by ID"
+                        size="small"
+                        value={searchId}
+                        onChange={e => setSearchId(e.target.value)}
+                        onKeyPress={e => {
+                            if (e.key === "Enter") handleSearch()
                         }}
+                        sx={{width: 150}}
+                    />
+                    <IconButton
+                        color="primary"
+                        onClick={handleSearch}
+                        sx={{bgcolor: "primary.main", color: "white", "&:hover": {bgcolor: "primary.dark"}}}
                     >
-                        <TextField
-                            label="Search by ID"
-                            size="small"
-                            value={searchId}
-                            onChange={e => setSearchId(e.target.value)}
-                            onKeyPress={e => { if (e.key === "Enter") handleSearch() }}
-                            sx={{ width: 150 }}
-                        />
-                        <IconButton
-                            color="primary"
-                            onClick={handleSearch}
-                            sx={{ bgcolor: "primary.main", color: "white", "&:hover": { bgcolor: "primary.dark" } }}
-                        >
-                            <SearchIcon />
-                        </IconButton>
-                        {searchId && (
-                            <Button variant="outlined" color="primary" onClick={handleClearSearch} sx={{ textTransform: "none" }}>
-                                Clear
-                            </Button>
-                        )}
-                    </Box>
-
-                    <Box sx={{ marginLeft: "auto" }}>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<AddIcon />}
-                            onClick={handleOpenAddDialog}
-                            sx={{ textTransform: "none" }}
-                        >
-                            Add New
+                        <SearchIcon/>
+                    </IconButton>
+                    {searchId && (
+                        <Button variant="outlined" color="primary" onClick={handleClearSearch}
+                                sx={{textTransform: "none"}}>
+                            Clear
                         </Button>
-                    </Box>
+                    )}
                 </Box>
 
-                <Box sx={{ mb: 3, display: "flex", alignItems: "center", width: "100%", position: "relative" }}>
-                    <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-                        <TextField
-                            label="Mood value"
-                            size="small"
-                            type="number"
-                            value={moodValue}
-                            onChange={(e) => {
-                                const val = e.target.value;
-                                if (/^-?\d*$/.test(val)) {
-                                    setMoodValue(val);
-                                }
-                            }}
-                            onKeyDown={(e) => {
-                                if ([".", ",", "e", "E"].includes(e.key)) {
-                                    e.preventDefault();
-                                }
-                            }}
-                            inputProps={{ inputMode: "numeric", pattern: "-?[0-9]*" }}
-                        />
-                        <IconButton
-                            color="primary"
-                            onClick={handleCountByMood}
-                            sx={{ bgcolor: "primary.main", color: "white", "&:hover": { bgcolor: "primary.dark" } }}
-                            title="Count objects with mood less than value"
-                        >
-                            <NumbersIcon />
-                        </IconButton>
-                    </Box>
+                <Box sx={{marginLeft: "auto"}}>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<AddIcon/>}
+                        onClick={handleOpenAddDialog}
+                        sx={{textTransform: "none"}}
+                        disabled={hasError || isLoading}
+                    >
+                        Add New
+                    </Button>
+                </Box>
+            </Box>
 
-                    <Box sx={{ display: "flex", gap: 1, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)" }}>
-                        <TextField
-                            label="Name prefix"
-                            size="small"
-                            value={namePrefix}
-                            onChange={e => setNamePrefix(e.target.value)}
-                        />
-                        <IconButton
-                            color="primary"
-                            onClick={handleFilterByName}
-                            sx={{ bgcolor: "primary.main", color: "white", "&:hover": { bgcolor: "primary.dark" } }}
-                            title="Filter by name prefix"
-                        >
-                            <FilterListIcon />
-                        </IconButton>
-                        {namePrefix && (
-                            <Button variant="outlined" color="primary" onClick={handleClearNameFilter} sx={{ textTransform: "none" }}>
-                                Clear
-                            </Button>
-                        )}
-                    </Box>
-
-                    <Box sx={{ display: "flex", gap: 1, alignItems: "center", marginLeft: "auto" }}>
-                        <IconButton
-                            color="primary"
-                            onClick={handleGetUniqueSpeeds}
-                            sx={{ bgcolor: "primary.main", color: "white", "&:hover": { bgcolor: "primary.dark" } }}
-                            title="Get unique impact speeds"
-                        >
-                            <SpeedIcon />
-                        </IconButton>
-                        <Typography variant="body2" sx={{ color: "text.secondary", whiteSpace: "nowrap" }}>
-                            Unique Speeds
-                        </Typography>
-                    </Box>
+            <Box sx={{mb: 3, display: "flex", alignItems: "center", width: "100%", position: "relative"}}>
+                <Box sx={{display: "flex", gap: 1, alignItems: "center"}}>
+                    <TextField
+                        label="Mood value"
+                        size="small"
+                        type="number"
+                        value={moodValue}
+                        onChange={(e) => {
+                            const val = e.target.value;
+                            if (/^-?\d*$/.test(val)) {
+                                setMoodValue(val);
+                            }
+                        }}
+                        onKeyDown={(e) => {
+                            if ([".", ",", "e", "E"].includes(e.key)) {
+                                e.preventDefault();
+                            }
+                        }}
+                        inputProps={{inputMode: "numeric", pattern: "-?[0-9]*"}}
+                    />
+                    <IconButton
+                        color="primary"
+                        onClick={handleCountByMood}
+                        sx={{bgcolor: "primary.main", color: "white", "&:hover": {bgcolor: "primary.dark"}}}
+                        title="Count objects with mood less than value"
+                    >
+                        <NumbersIcon/>
+                    </IconButton>
                 </Box>
 
-                {operationResult && (
-                    <Box sx={{ mb: 2 }}>
-                        {operationResult.type === "mood" && (
-                            <Alert severity="info" onClose={() => setOperationResult(null)}>
-                                Count of objects with mood less than {operationResult.moodValueAtQuery}: <strong>{operationResult.value}</strong>
-                            </Alert>
-                        )}
-                        {operationResult.type === "name" && (
-                            <Alert severity="info" onClose={() => setOperationResult(null)}>
-                                Found <strong>{operationResult.value}</strong> objects with name starting with "{operationResult.namePrefixAtQuery}"
-                            </Alert>
-                        )}
-                        {operationResult.type === "speeds" && (
-                            <Alert severity="info" onClose={() => setOperationResult(null)}>
-                                Unique impact speeds:{" "}
-                                {operationResult.value.map((speed, i) => (
-                                    <Chip
-                                        key={i}
-                                        label={speed}
-                                        size="small"
-                                        sx={{ ml: 0.5, bgcolor: "primary.light", color: "white" }}
-                                    />
-                                ))}
-                            </Alert>
-                        )}
-                    </Box>
-                )}
+                <Box sx={{
+                    display: "flex",
+                    gap: 1,
+                    alignItems: "center",
+                    position: "absolute",
+                    left: "50%",
+                    transform: "translateX(-50%)"
+                }}>
+                    <TextField
+                        label="Name prefix"
+                        size="small"
+                        value={namePrefix}
+                        onChange={e => setNamePrefix(e.target.value)}
+                    />
+                    <IconButton
+                        color="primary"
+                        onClick={handleFilterByName}
+                        sx={{bgcolor: "primary.main", color: "white", "&:hover": {bgcolor: "primary.dark"}}}
+                        title="Filter by name prefix"
+                    >
+                        <FilterListIcon/>
+                    </IconButton>
+                    {namePrefix && (
+                        <Button variant="outlined" color="primary" onClick={handleClearNameFilter}
+                                sx={{textTransform: "none"}}>
+                            Clear
+                        </Button>
+                    )}
+                </Box>
 
+                <Box sx={{display: "flex", gap: 1, alignItems: "center", marginLeft: "auto"}}>
+                    <IconButton
+                        color="primary"
+                        onClick={handleGetUniqueSpeeds}
+                        sx={{bgcolor: "primary.main", color: "white", "&:hover": {bgcolor: "primary.dark"}}}
+                        title="Get unique impact speeds"
+                    >
+                        <SpeedIcon/>
+                    </IconButton>
+                    <Typography variant="body2" sx={{color: "text.secondary", whiteSpace: "nowrap"}}>
+                        Unique Speeds
+                    </Typography>
+                </Box>
+            </Box>
+
+            {operationResult && (
+                <Box sx={{mb: 2}}>
+                    {operationResult.type === "mood" && (
+                        <Alert severity="info" onClose={() => setOperationResult(null)}>
+                            Count of objects with mood less
+                            than {operationResult.moodValueAtQuery}: <strong>{operationResult.value}</strong>
+                        </Alert>
+                    )}
+                    {operationResult.type === "name" && (
+                        <Alert severity="info" onClose={() => setOperationResult(null)}>
+                            Found <strong>{operationResult.value}</strong> objects with name starting with
+                            "{operationResult.namePrefixAtQuery}"
+                        </Alert>
+                    )}
+                    {operationResult.type === "speeds" && (
+                        <Alert severity="info" onClose={() => setOperationResult(null)}>
+                            Unique impact speeds:{" "}
+                            {operationResult.value.map((speed, i) => (
+                                <Chip
+                                    key={i}
+                                    label={speed}
+                                    size="small"
+                                    sx={{ml: 0.5, bgcolor: "primary.light", color: "white"}}
+                                />
+                            ))}
+                        </Alert>
+                    )}
+                </Box>
+            )}
+
+            {isLoading && (
+                <Box sx={{display: "flex", justifyContent: "center", my: 4}}>
+                    <CircularProgress/>
+                </Box>
+            )}
+            {hasError && (
+                <Alert severity="error" sx={{my: 2}}>
+                    Не удалось загрузить данные с сервера. Попробуйте снова.
+                </Alert>
+            )}
+
+            {!isLoading && !hasError && (
                 <HumanBeingTable
                     data={filteredHumanBeings}
                     onEdit={handleOpenEditDialog}
                     onDelete={handleDelete}
                     formatDate={formatDateForDisplay}
                 />
+            )}
 
-                <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+            {!isLoading && !hasError && (
+                <Box sx={{display: "flex", justifyContent: "center", mt: 2}}>
                     <Pagination
                         count={totalPages}
                         page={page + 1}
@@ -461,19 +507,18 @@ export default function MainPage() {
                         color="primary"
                     />
                 </Box>
+            )}
 
-                <HumanBeingDialog
-                    open={openDialog}
-                    onClose={handleCloseDialog}
-                    currentItem={currentItem}
-                    onChange={handleInputChange}
-                    onSubmit={editMode ? handleUpdate : handleAdd}
-                    editMode={editMode}
-                    WEAPON_TYPES={WEAPON_TYPES}
-                    MOODS={MOODS}
-                />
-
-            </Box>
-        </ThemeProvider>
-    );
+            <HumanBeingDialog
+                open={openDialog}
+                onClose={handleCloseDialog}
+                currentItem={currentItem}
+                onChange={handleInputChange}
+                onSubmit={editMode ? handleUpdate : handleAdd}
+                editMode={editMode}
+                WEAPON_TYPES={WEAPON_TYPES}
+                MOODS={MOODS}
+            />
+        </Box>
+    )
 }

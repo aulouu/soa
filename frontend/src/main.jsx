@@ -2,13 +2,16 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from "./App.jsx";
 import {ToastContainer} from "react-toastify";
+import {ThemeProvider} from "@mui/material";
+import theme from './theme.js';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
+    <ThemeProvider theme={theme}>
         <App/>
         <ToastContainer
             position="top-right"
-            autoClose={5000}
+            autoClose={3000}
+            limit={2}
             hideProgressBar={false}
             newestOnTop={false}
             closeOnClick
@@ -18,5 +21,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             pauseOnHover
             theme="light"
         />
-    </React.StrictMode>,
+    </ThemeProvider>
 )
