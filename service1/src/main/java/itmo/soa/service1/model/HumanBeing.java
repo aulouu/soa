@@ -4,9 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-
 import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Table(name = "human_beings")
@@ -17,59 +16,62 @@ import java.time.LocalDateTime;
 @Builder
 @ToString
 public class HumanBeing {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
 
-    @NotBlank
-    @Column(name = "name", nullable = false)
-    private String name;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
+  private Long id;
 
-    @NotNull
-    @Embedded
-    private Coordinates coordinates;
+  @NotBlank
+  @Column(name = "name", nullable = false)
+  private String name;
 
-    @Column(name = "creation_date", nullable = false)
-    private LocalDateTime creationDate;
+  @NotNull
+  @Embedded
+  private Coordinates coordinates;
 
-    @Column(name = "real_hero")
-    private Boolean realHero;
+  @Column(name = "creation_date", nullable = false)
+  private LocalDateTime creationDate;
 
-    @Column(name = "has_toothpick")
-    private Boolean hasToothpick;
+  @Column(name = "real_hero")
+  private Boolean realHero;
 
-    @Min(-441)
-    @Column(name = "impact_speed")
-    private Integer impactSpeed;
+  @Column(name = "has_toothpick")
+  private Boolean hasToothpick;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "weapon_type")
-    private WeaponType weaponType;
+  @Min(-441)
+  @Column(name = "impact_speed")
+  private Integer impactSpeed;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "mood")
-    private Mood mood;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "weapon_type")
+  private WeaponType weaponType;
 
-    @Embedded
-    private Car car;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "mood")
+  private Mood mood;
 
-    @Column(name = "teamId", nullable = false)
-    private Integer teamId;
+  @Embedded
+  private Car car;
 
-    @PrePersist
-    protected void onCreate() {
-        if (creationDate == null) {
-            creationDate = LocalDateTime.now();
-        }
-        if (this.weaponType != null) {
-            this.weaponType = WeaponType.valueOf(this.weaponType.name().toUpperCase());
-        }
-        if (this.mood != null) {
-            this.mood = Mood.valueOf(this.mood.name().toUpperCase());
-        }
-        if (teamId == null) {
-            teamId = (int) (Math.random() * 10) + 1;
-        }
+  @Column(name = "team_id", nullable = true)
+  private Integer teamId;
+
+  @PrePersist
+  protected void onCreate() {
+    if (creationDate == null) {
+      creationDate = LocalDateTime.now();
     }
+    if (this.weaponType != null) {
+      this.weaponType = WeaponType.valueOf(
+        this.weaponType.name().toUpperCase()
+      );
+    }
+    if (this.mood != null) {
+      this.mood = Mood.valueOf(this.mood.name().toUpperCase());
+    }
+    if (teamId == null) {
+      teamId = (int) (Math.random() * 10) + 1;
+    }
+  }
 }
