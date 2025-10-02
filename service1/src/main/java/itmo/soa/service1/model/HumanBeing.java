@@ -54,6 +54,9 @@ public class HumanBeing {
     @Embedded
     private Car car;
 
+    @Column(name = "teamId", nullable = false)
+    private Integer teamId;
+
     @PrePersist
     protected void onCreate() {
         if (creationDate == null) {
@@ -64,6 +67,9 @@ public class HumanBeing {
         }
         if (this.mood != null) {
             this.mood = Mood.valueOf(this.mood.name().toUpperCase());
+        }
+        if (teamId == null) {
+            teamId = (int) (Math.random() * 10) + 1;
         }
     }
 }

@@ -76,6 +76,12 @@ export default function HumanBeingTable({ data, onEdit, onDelete, formatDate, so
                         >
                             Car Cool {renderSortArrow('car.cool')}
                         </TableCell>
+                        <TableCell
+                            sx={{ color: "white", fontWeight: 600, cursor: "pointer" }}
+                            onClick={() => onSort('teamId')}
+                        >
+                            Team ID {renderSortArrow('teamId')}
+                        </TableCell>
                         <TableCell sx={{ color: "white", fontWeight: 600 }} align="right"></TableCell>
                     </TableRow>
                 </TableHead>
@@ -93,6 +99,7 @@ export default function HumanBeingTable({ data, onEdit, onDelete, formatDate, so
                             <TableCell>{row.weaponType}</TableCell>
                             <TableCell>{row.mood}</TableCell>
                             <TableCell>{row.car?.cool ? "Yes" : "No"}</TableCell>
+                            <TableCell>{row.teamId}</TableCell>
                             <TableCell align="right">
                                 <IconButton color="primary" size="small" onClick={() => onEdit(row)} sx={{ mr: 1 }}>
                                     <EditIcon />
