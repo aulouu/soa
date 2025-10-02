@@ -2,18 +2,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.6</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
+    
     <groupId>itmo.soa</groupId>
     <artifactId>service2</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>service2</name>
     <description>service2</description>
-    <packaging>jar</packaging>
+    <packaging>war</packaging>
     <url/>
     <licenses>
         <license/>
@@ -32,11 +27,7 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>itmo.soa</groupId>
-            <artifactId>service1</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
+        
 
         <dependency>
             <groupId>javax</groupId>
@@ -51,9 +42,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>jakarta.ws.rs</groupId>
-            <artifactId>jakarta.ws.rs-api</artifactId>
-            <version>3.1.0</version>
+            <groupId>javax.ws.rs</groupId>
+            <artifactId>javax.ws.rs-api</artifactId>
+            <version>2.1.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -64,6 +55,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.3.2</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -74,24 +68,13 @@
                     <target>17</target>
                 </configuration>
             </plugin>
-            <!-- Payara Maven Plugin -->
+            
             <plugin>
                 <groupId>fish.payara.maven.plugins</groupId>
                 <artifactId>payara-micro-maven-plugin</artifactId>
                 <version>2.1</version>
-                <configuration>
-                    <payaraVersion>2.1</payaraVersion>
-                    <deployWar>true</deployWar>
-                    <useUberJar>false</useUberJar>
-                    <contextRoot>/</contextRoot>
-                    <!-- Правильный способ передачи опций -->
-                    <commandLineOptions>
-                        <nocluster>true</nocluster>
-                        <disablePhoneHome>true</disablePhoneHome>
-                        <noSecurity>true</noSecurity>
-                    </commandLineOptions>
-                </configuration>
-            </plugin>
+              </plugin>
+            
         </plugins>
     </build>
 

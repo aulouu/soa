@@ -1,0 +1,1 @@
+mvn clean package payara-micro:start -DpayaraVersion=5.2022.5 -DdeployWar=true -DcontextRoot=/
