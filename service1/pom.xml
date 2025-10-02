@@ -13,6 +13,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>service1</name>
     <description>service1</description>
+    <packaging>jar</packaging>
     <url/>
     <licenses>
         <license/>

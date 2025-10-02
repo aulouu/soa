@@ -261,6 +261,8 @@ export default function MainPage() {
         try {
             const data = await fetchHumanBeingById(searchId.trim());
             setFilteredHumanBeings([data]);
+            setTotalPages(1);
+            setPage(0);
         } catch (error) {
             console.error(error.message);
             setFilteredHumanBeings([]);
@@ -318,6 +320,8 @@ export default function MainPage() {
                 value: data.length,
                 namePrefixAtQuery: namePrefix
             });
+            setTotalPages(1);
+            setPage(0);
         } catch (error) {
             console.error(error);
             setHasError(true);
