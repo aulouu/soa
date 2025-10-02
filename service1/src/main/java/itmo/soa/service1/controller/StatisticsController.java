@@ -26,7 +26,6 @@ public class StatisticsController {
         return statisticsService.findByNameStartingWith(substring);
     }
 
-
     @GetMapping("/impact-speeds")
     public List<Integer> findDistinctImpactSpeeds() {
         return statisticsService.findDistinctImpactSpeeds();

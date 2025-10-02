@@ -85,17 +85,19 @@ export default function MainPage() {
         }
         setSortKey(key);
         setSortDirection(newDirection);
+
         const sortedData = [...filteredHumanBeings].sort((a, b) => {
             const getValue = (obj, key) => key.split('.').reduce((o, k) => o?.[k], obj);
+
             const aVal = getValue(a, key);
             const bVal = getValue(b, key);
 
             if (aVal === null || aVal === undefined) return 1;
             if (bVal === null || bVal === undefined) return -1;
+
             if (typeof aVal === 'number' && typeof bVal === 'number') {
                 return newDirection === 'asc' ? aVal - bVal : bVal - aVal;
             }
-
             return newDirection === 'asc'
                 ? String(aVal).localeCompare(String(bVal))
                 : String(bVal).localeCompare(String(aVal));
@@ -271,6 +273,8 @@ export default function MainPage() {
 
     const handleClearSearch = () => {
         setSearchId("");
+        setSortKey(null);
+        setSortDirection('asc');
         loadHumanBeingsPage(page);
     };
 
@@ -325,6 +329,8 @@ export default function MainPage() {
 
     const handleClearNameFilter = () => {
         setNamePrefix("");
+        setSortKey(null);
+        setSortDirection('asc');
         loadHumanBeingsPage(page);
         setOperationResult(null);
     };
@@ -347,7 +353,6 @@ export default function MainPage() {
 
     return (
         <Box sx={{p: 4, minHeight: "100vh", bgcolor: "background.default"}}>
-
             <Box sx={{mb: 3, display: "flex", alignItems: "center", position: "relative"}}>
                 <Typography variant="h4" sx={{color: "primary.main", fontWeight: 600}}>Human Beings</Typography>
 
