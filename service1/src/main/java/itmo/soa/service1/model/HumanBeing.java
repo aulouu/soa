@@ -59,5 +59,11 @@ public class HumanBeing {
         if (creationDate == null) {
             creationDate = LocalDateTime.now();
         }
+        if (this.weaponType != null) {
+            this.weaponType = WeaponType.valueOf(this.weaponType.name().toUpperCase());
+        }
+        if (this.mood != null) {
+            this.mood = Mood.valueOf(this.mood.name().toUpperCase());
+        }
     }
 }

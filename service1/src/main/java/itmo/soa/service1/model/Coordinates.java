@@ -15,11 +15,11 @@ import lombok.*;
 @ToString
 public class Coordinates {
     @NotNull
-    @Column(name = "coordinates_x", nullable = false)
+    @Column(name = "coordinate_x", nullable = false)
     private Long x;
 
     @NotNull
     @Max(507)
-    @Column(name = "coordinates_y", nullable = false)
+    @Column(name = "coordinate_y", nullable = false)
     private Integer y;
 }
