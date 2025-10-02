@@ -1,5 +1,6 @@
 const BASE_URL = 'http://localhost:2468/api/human-beings';
 const STATISTICS_URL = 'http://localhost:2468/api/statistics';
+const HEROES_URL = 'http://localhost:2468/api/heroes';
 
 export const fetchAllHumanBeings = async (page = 0, size = 10, sortField = null, sortDir = 'asc') => {
     let url = `${BASE_URL}?page=${page}&size=${size}`;
@@ -63,5 +64,23 @@ export const filterByNamePrefix = async (prefix) => {
 export const getUniqueImpactSpeeds = async () => {
     const res = await fetch(`${STATISTICS_URL}/impact-speeds`);
     if (!res.ok) throw new Error("Failed to fetch unique speeds");
+    return res.json();
+};
+
+export const removeWithoutToothpick = async (teamId) => {
+    const res = await fetch(`${HEROES_URL}/team/${teamId}/remove-without-toothpick`, {
+        method: 'DELETE'
+    });
+    if (!res.ok) throw new Error("Failed to remove heroes without toothpick");
+    return res.status === 204 ? null : await res.json();
+};
+
+export const addCarToTeam = async (teamId) => {
+    const res = await fetch(`${HEROES_URL}/team/${teamId}/car/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}) // тело пустое
+    });
+    if (!res.ok) throw new Error("Failed to add cars to team");
     return res.json();
 };

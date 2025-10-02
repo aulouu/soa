@@ -19,7 +19,9 @@ import {
     fetchHumanBeingById,
     filterByNamePrefix,
     getUniqueImpactSpeeds,
-    updateHumanBeing
+    updateHumanBeing,
+    removeWithoutToothpick,
+    addCarToTeam
 } from "./api/humanBeings";
 import HumanBeingTable from "./components/HumanBeingTable";
 import HumanBeingDialog from "./components/HumanBeingDialog";
@@ -168,8 +170,9 @@ export default function MainPage() {
 
     const handleAdd = async () => {
         if (!validateHumanBeingForm()) return;
+        setIsLoading(true);
         try {
-            await addHumanBeing({
+            const newHuman = await addHumanBeing({
                 ...currentItem,
                 coordinates: {
                     x: Number(currentItem.coordinates.x),
@@ -177,20 +180,30 @@ export default function MainPage() {
                 },
                 weaponType: currentItem.weaponType || null,
                 mood: currentItem.mood || null,
-                car: {cool: currentItem.car.cool}
+                car: { cool: currentItem.car.cool }
             });
+
+            if (!newHuman || !newHuman.id) {
+                toast.error("Failed to add HumanBeing");
+                return;
+            }
+
             toast.success("HumanBeing added successfully");
             handleCloseDialog();
             loadHumanBeingsPage(page);
         } catch (error) {
-            toast.error(error.message);
+            console.error(error);
+            toast.error(error.message || "Error occurred while adding HumanBeing");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleUpdate = async () => {
         if (!validateHumanBeingForm()) return;
+        setIsLoading(true);
         try {
-            await updateHumanBeing(currentItem.id, {
+            const updatedHuman = await updateHumanBeing(currentItem.id, {
                 ...currentItem,
                 coordinates: {
                     x: Number(currentItem.coordinates.x),
@@ -198,23 +211,36 @@ export default function MainPage() {
                 },
                 weaponType: currentItem.weaponType || null,
                 mood: currentItem.mood || null,
-                car: {cool: currentItem.car.cool}
+                car: { cool: currentItem.car.cool }
             });
+
+            if (!updatedHuman || updatedHuman.id !== currentItem.id) {
+                toast.error("Failed to update HumanBeing");
+                return;
+            }
+
             toast.success("HumanBeing updated successfully");
             handleCloseDialog();
             loadHumanBeingsPage(page);
         } catch (error) {
-            toast.error(error.message);
+            console.error(error);
+            toast.error(error.message || "Error occurred while updating HumanBeing");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleDelete = async (id) => {
+        setIsLoading(true);
         try {
             await deleteHumanBeing(id);
             toast.success("HumanBeing deleted successfully");
             loadHumanBeingsPage(page);
         } catch (error) {
-            toast.error(error.message);
+            console.error(error);
+            toast.error(error.message || "Error occurred while deleting HumanBeing");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -310,7 +336,10 @@ export default function MainPage() {
     };
 
     const handleFilterByName = async () => {
-        if (!namePrefix.trim()) return;
+        if (!namePrefix.trim()) {
+            toast.error("Name prefix cannot be empty");
+            return;
+        }
         setIsLoading(true);
         setHasError(false);
         try {
@@ -358,20 +387,19 @@ export default function MainPage() {
 
     const handleRemoveWithoutToothpick = async () => {
         if (!teamId.trim()) {
-            toast.error("Введите Team ID");
+            toast.error("Team ID cannot be empty");
             return;
         }
         setIsLoading(true);
+        setHasError(false);
         try {
-            // TODO: заменить мок на реальный API вызов
-            await new Promise(resolve => setTimeout(resolve, 500));
-            setOperationResult({
-                type: "removeToothpick",
-                teamId: teamId
-            });
+            await removeWithoutToothpick(teamId);
+            setOperationResult({ type: "removeToothpick", teamId });
             setTeamId("");
         } catch (error) {
-            toast.error("Ошибка при удалении героев");
+            console.error(error);
+            setHasError(true);
+            toast.error("Error loading data from the server");
         } finally {
             setIsLoading(false);
         }
@@ -379,22 +407,20 @@ export default function MainPage() {
 
     const handleAddCarToTeam = async () => {
         if (!teamId.trim()) {
-            toast.error("Введите Team ID");
+            toast.error("Team ID cannot be empty");
             return;
         }
         setIsLoading(true);
+        setHasError(false);
         try {
-            // TODO: заменить мок на реальный API вызов
-            await new Promise(resolve => setTimeout(resolve, 500));
-            const mockedIds = [1, 3, 7]; // мокнутые ID пересаженных героев
-            setOperationResult({
-                type: "addCar",
-                teamId: teamId,
-                ids: mockedIds
-            });
+            const heroes = await addCarToTeam(teamId);
+            const ids = heroes.map(h => h.id);
+            setOperationResult({ type: "addCar", teamId, ids });
             setTeamId("");
         } catch (error) {
-            toast.error("Ошибка при добавлении машин");
+            console.error(error);
+            setHasError(true);
+            toast.error("Error loading data from the server");
         } finally {
             setIsLoading(false);
         }
