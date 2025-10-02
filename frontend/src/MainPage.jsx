@@ -48,6 +48,7 @@ export default function MainPage() {
     const [moodValue, setMoodValue] = useState("");
     const [namePrefix, setNamePrefix] = useState("");
     const [uniqueSpeeds, setUniqueSpeeds] = useState([]);
+    const [teamId, setTeamId] = useState("");
     const [operationResult, setOperationResult] = useState(null);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
@@ -59,7 +60,7 @@ export default function MainPage() {
     useEffect(() => {
         loadHumanBeingsPage(0);
     }, []);
-    
+
     const loadHumanBeingsPage = async (pageNumber = 0, sortField = sortKey, sortDir = sortDirection) => {
         setIsLoading(true);
         setHasError(false);
@@ -77,7 +78,7 @@ export default function MainPage() {
             setIsLoading(false);
         }
     };
-    
+
     const handleSort = (key) => {
         let newDirection = 'asc';
         if (sortKey === key) {
@@ -355,21 +356,56 @@ export default function MainPage() {
         }
     };
 
+    const handleRemoveWithoutToothpick = async () => {
+        if (!teamId.trim()) {
+            toast.error("Введите Team ID");
+            return;
+        }
+        setIsLoading(true);
+        try {
+            // TODO: заменить мок на реальный API вызов
+            await new Promise(resolve => setTimeout(resolve, 500));
+            setOperationResult({
+                type: "removeToothpick",
+                teamId: teamId
+            });
+            setTeamId("");
+        } catch (error) {
+            toast.error("Ошибка при удалении героев");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleAddCarToTeam = async () => {
+        if (!teamId.trim()) {
+            toast.error("Введите Team ID");
+            return;
+        }
+        setIsLoading(true);
+        try {
+            // TODO: заменить мок на реальный API вызов
+            await new Promise(resolve => setTimeout(resolve, 500));
+            const mockedIds = [1, 3, 7]; // мокнутые ID пересаженных героев
+            setOperationResult({
+                type: "addCar",
+                teamId: teamId,
+                ids: mockedIds
+            });
+            setTeamId("");
+        } catch (error) {
+            toast.error("Ошибка при добавлении машин");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <Box sx={{p: 4, minHeight: "100vh", bgcolor: "background.default"}}>
             <Box sx={{mb: 3, display: "flex", alignItems: "center", position: "relative"}}>
                 <Typography variant="h4" sx={{color: "primary.main", fontWeight: 600}}>Human Beings</Typography>
 
-                <Box
-                    sx={{
-                        display: "flex",
-                        gap: 2,
-                        alignItems: "center",
-                        position: "absolute",
-                        left: "50%",
-                        transform: "translateX(-50%)"
-                    }}
-                >
+                <Box sx={{ display: "flex", gap: 2, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)"}}>
                     <TextField
                         label="Search by ID"
                         size="small"
@@ -439,14 +475,7 @@ export default function MainPage() {
                     </IconButton>
                 </Box>
 
-                <Box sx={{
-                    display: "flex",
-                    gap: 1,
-                    alignItems: "center",
-                    position: "absolute",
-                    left: "50%",
-                    transform: "translateX(-50%)"
-                }}>
+                <Box sx={{display: "flex", gap: 1, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)"}}>
                     <TextField
                         label="Name prefix"
                         size="small"
@@ -484,6 +513,32 @@ export default function MainPage() {
                 </Box>
             </Box>
 
+            <Box sx={{mb: 3, display: "flex", alignItems: "center", gap: 2}}>
+                <Button
+                    variant="contained"
+                    color="error"
+                    onClick={handleRemoveWithoutToothpick}
+                    sx={{textTransform: "none"}}
+                >
+                    Remove Without Toothpick
+                </Button>
+                <TextField
+                    label="Team ID"
+                    size="small"
+                    value={teamId}
+                    onChange={(e) => setTeamId(e.target.value)}
+                    sx={{width: 120}}
+                />
+                <Button
+                    variant="contained"
+                    color="secondary"
+                    onClick={handleAddCarToTeam}
+                    sx={{textTransform: "none"}}
+                >
+                    Transfer to red Lada Kalina
+                </Button>
+            </Box>
+
             {operationResult && (
                 <Box sx={{mb: 2}}>
                     {operationResult.type === "mood" && (
@@ -509,6 +564,17 @@ export default function MainPage() {
                                     sx={{ml: 0.5, bgcolor: "primary.light", color: "white"}}
                                 />
                             ))}
+                        </Alert>
+                    )}
+                    {operationResult?.type === "removeToothpick" && (
+                        <Alert severity="success" onClose={() => setOperationResult(null)}>
+                            Из команды <strong>{operationResult.teamId}</strong> удалены все герои без зубочисток.
+                        </Alert>
+                    )}
+                    {operationResult?.type === "addCar" && (
+                        <Alert severity="info" onClose={() => setOperationResult(null)}>
+                            В команде <strong>{operationResult.teamId}</strong> пересажены герои с ID:{" "}
+                            {operationResult.ids.join(", ")}
                         </Alert>
                     )}
                 </Box>
