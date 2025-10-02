@@ -1,13 +1,12 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
+import { ThemeProvider } from "@mui/material";
+import ReactDOM from "react-dom/client";
+import { ToastContainer } from "react-toastify";
 import App from "./App.jsx";
-import {ToastContainer} from "react-toastify";
-import {ThemeProvider} from "@mui/material";
-import theme from './theme.js';
+import theme from "./theme.js";
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
     <ThemeProvider theme={theme}>
-        <App/>
+        <App />
         <ToastContainer
             position="top-right"
             autoClose={3000}
@@ -22,4 +21,5 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             theme="light"
         />
     </ThemeProvider>
-)
+);
+

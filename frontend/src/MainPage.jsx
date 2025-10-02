@@ -1,14 +1,22 @@
-"use client"
-
-import {useEffect, useState} from "react";
-import {Alert, Box, Button, Chip, CircularProgress, IconButton, Pagination, TextField, Typography} from "@mui/material";
-import {toast} from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import {
+    Alert,
+    Box,
+    Button,
+    Chip,
+    CircularProgress,
+    IconButton,
+    Pagination,
+    TextField,
+    Typography,
+} from "@mui/material";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
-import NumbersIcon from "@mui/icons-material/Numbers";
 import FilterListIcon from "@mui/icons-material/FilterList";
+import NumbersIcon from "@mui/icons-material/Numbers";
+import SearchIcon from "@mui/icons-material/Search";
 import SpeedIcon from "@mui/icons-material/Speed";
 
 import {
@@ -19,14 +27,14 @@ import {
     fetchHumanBeingById,
     filterByNamePrefix,
     getUniqueImpactSpeeds,
-    updateHumanBeing
+    updateHumanBeing,
 } from "./api/humanBeings";
-import HumanBeingTable from "./components/HumanBeingTable";
 import HumanBeingDialog from "./components/HumanBeingDialog";
+import HumanBeingTable from "./components/HumanBeingTable";
 
 export default function MainPage() {
-    const WEAPON_TYPES = ['HAMMER', 'AXE', 'PISTOL', 'RIFLE', 'KNIFE'];
-    const MOODS = ['SADNESS', 'SORROW', 'APATHY', 'FRENZY'];
+    const WEAPON_TYPES = ["HAMMER", "AXE", "PISTOL", "RIFLE", "KNIFE"];
+    const MOODS = ["SADNESS", "SORROW", "APATHY", "FRENZY"];
     const PAGE_SIZE = 10;
 
     const [humanBeings, setHumanBeings] = useState([]);
@@ -37,13 +45,13 @@ export default function MainPage() {
     const [currentItem, setCurrentItem] = useState({
         id: "",
         name: "",
-        coordinates: {x: "", y: ""},
+        coordinates: { x: "", y: "" },
         realHero: false,
         hasToothpick: false,
         impactSpeed: "",
         weaponType: "",
         mood: "",
-        car: {cool: false}
+        car: { cool: false },
     });
     const [moodValue, setMoodValue] = useState("");
     const [namePrefix, setNamePrefix] = useState("");
@@ -53,7 +61,7 @@ export default function MainPage() {
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [sortKey, setSortKey] = useState(null);
-    const [sortDirection, setSortDirection] = useState('asc');
+    const [sortDirection, setSortDirection] = useState("asc");
     const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
 
@@ -61,11 +69,20 @@ export default function MainPage() {
         loadHumanBeingsPage(0);
     }, []);
 
-    const loadHumanBeingsPage = async (pageNumber = 0, sortField = sortKey, sortDir = sortDirection) => {
+    const loadHumanBeingsPage = async (
+        pageNumber = 0,
+        sortField = sortKey,
+        sortDir = sortDirection
+    ) => {
         setIsLoading(true);
         setHasError(false);
         try {
-            const data = await fetchAllHumanBeings(pageNumber, PAGE_SIZE, sortField, sortDir);
+            const data = await fetchAllHumanBeings(
+                pageNumber,
+                PAGE_SIZE,
+                sortField,
+                sortDir
+            );
             setHumanBeings(data.content);
             setFilteredHumanBeings(data.content);
             setTotalPages(data.totalPages);
@@ -80,15 +97,16 @@ export default function MainPage() {
     };
 
     const handleSort = (key) => {
-        let newDirection = 'asc';
+        let newDirection = "asc";
         if (sortKey === key) {
-            newDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            newDirection = sortDirection === "asc" ? "desc" : "asc";
         }
         setSortKey(key);
         setSortDirection(newDirection);
 
         const sortedData = [...filteredHumanBeings].sort((a, b) => {
-            const getValue = (obj, key) => key.split('.').reduce((o, k) => o?.[k], obj);
+            const getValue = (obj, key) =>
+                key.split(".").reduce((o, k) => o?.[k], obj);
 
             const aVal = getValue(a, key);
             const bVal = getValue(b, key);
@@ -96,10 +114,10 @@ export default function MainPage() {
             if (aVal === null || aVal === undefined) return 1;
             if (bVal === null || bVal === undefined) return -1;
 
-            if (typeof aVal === 'number' && typeof bVal === 'number') {
-                return newDirection === 'asc' ? aVal - bVal : bVal - aVal;
+            if (typeof aVal === "number" && typeof bVal === "number") {
+                return newDirection === "asc" ? aVal - bVal : bVal - aVal;
             }
-            return newDirection === 'asc'
+            return newDirection === "asc"
                 ? String(aVal).localeCompare(String(bVal))
                 : String(bVal).localeCompare(String(aVal));
         });
@@ -118,26 +136,27 @@ export default function MainPage() {
     const handleInputChange = (field, value) => {
         if (field.startsWith("coordinates.")) {
             const key = field.split(".")[1];
-            setCurrentItem(prev => ({
+            setCurrentItem((prev) => ({
                 ...prev,
-                coordinates: {...prev.coordinates, [key]: Number(value)}
+                coordinates: { ...prev.coordinates, [key]: Number(value) },
             }));
         } else if (field.startsWith("car.")) {
             const key = field.split(".")[1];
-            setCurrentItem(prev => ({
+            setCurrentItem((prev) => ({
                 ...prev,
-                car: {...prev.car, [key]: value}
+                car: { ...prev.car, [key]: value },
             }));
         } else {
-            setCurrentItem(prev => ({
+            setCurrentItem((prev) => ({
                 ...prev,
-                [field]: field === "impactSpeed" ? Number(value) : value
+                [field]: field === "impactSpeed" ? Number(value) : value,
             }));
         }
     };
 
     const validateHumanBeingForm = () => {
-        const {name, coordinates, impactSpeed, weaponType, mood} = currentItem;
+        const { name, coordinates, impactSpeed, weaponType, mood } =
+            currentItem;
 
         if (!name || !name.trim()) {
             toast.error("Name cannot be empty");
@@ -173,11 +192,11 @@ export default function MainPage() {
                 ...currentItem,
                 coordinates: {
                     x: Number(currentItem.coordinates.x),
-                    y: Number(currentItem.coordinates.y)
+                    y: Number(currentItem.coordinates.y),
                 },
                 weaponType: currentItem.weaponType || null,
                 mood: currentItem.mood || null,
-                car: {cool: currentItem.car.cool}
+                car: { cool: currentItem.car.cool },
             });
             toast.success("HumanBeing added successfully");
             handleCloseDialog();
@@ -194,11 +213,11 @@ export default function MainPage() {
                 ...currentItem,
                 coordinates: {
                     x: Number(currentItem.coordinates.x),
-                    y: Number(currentItem.coordinates.y)
+                    y: Number(currentItem.coordinates.y),
                 },
                 weaponType: currentItem.weaponType || null,
                 mood: currentItem.mood || null,
-                car: {cool: currentItem.car.cool}
+                car: { cool: currentItem.car.cool },
             });
             toast.success("HumanBeing updated successfully");
             handleCloseDialog();
@@ -223,13 +242,13 @@ export default function MainPage() {
         setCurrentItem({
             id: "",
             name: "",
-            coordinates: {x: "", y: ""},
+            coordinates: { x: "", y: "" },
             realHero: false,
             hasToothpick: false,
             impactSpeed: "",
             weaponType: "",
             mood: "",
-            car: {cool: false}
+            car: { cool: false },
         });
         setOpenDialog(true);
     };
@@ -239,13 +258,16 @@ export default function MainPage() {
         setCurrentItem({
             id: item.id,
             name: item.name,
-            coordinates: {x: item.coordinates?.x || "", y: item.coordinates?.y || ""},
+            coordinates: {
+                x: item.coordinates?.x || "",
+                y: item.coordinates?.y || "",
+            },
             realHero: item.realHero,
             hasToothpick: item.hasToothpick,
             impactSpeed: item.impactSpeed,
             weaponType: item.weaponType,
             mood: item.mood,
-            car: {cool: item.car?.cool || false}
+            car: { cool: item.car?.cool || false },
         });
         setOpenDialog(true);
     };
@@ -277,7 +299,7 @@ export default function MainPage() {
     const handleClearSearch = () => {
         setSearchId("");
         setSortKey(null);
-        setSortDirection('asc');
+        setSortDirection("asc");
         loadHumanBeingsPage(page);
     };
 
@@ -298,7 +320,7 @@ export default function MainPage() {
             setOperationResult({
                 type: "mood",
                 value: count,
-                moodValueAtQuery: moodValue
+                moodValueAtQuery: moodValue,
             });
         } catch (error) {
             console.error(error);
@@ -319,7 +341,7 @@ export default function MainPage() {
             setOperationResult({
                 type: "name",
                 value: data.length,
-                namePrefixAtQuery: namePrefix
+                namePrefixAtQuery: namePrefix,
             });
             setTotalPages(1);
             setPage(0);
@@ -335,7 +357,7 @@ export default function MainPage() {
     const handleClearNameFilter = () => {
         setNamePrefix("");
         setSortKey(null);
-        setSortDirection('asc');
+        setSortDirection("asc");
         loadHumanBeingsPage(page);
         setOperationResult(null);
     };
@@ -346,7 +368,7 @@ export default function MainPage() {
         try {
             const data = await getUniqueImpactSpeeds();
             setUniqueSpeeds(data);
-            setOperationResult({type: "speeds", value: data});
+            setOperationResult({ type: "speeds", value: data });
         } catch (error) {
             console.error(error);
             setHasError(true);
@@ -364,10 +386,10 @@ export default function MainPage() {
         setIsLoading(true);
         try {
             // TODO: заменить мок на реальный API вызов
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 500));
             setOperationResult({
                 type: "removeToothpick",
-                teamId: teamId
+                teamId: teamId,
             });
             setTeamId("");
         } catch (error) {
@@ -385,12 +407,12 @@ export default function MainPage() {
         setIsLoading(true);
         try {
             // TODO: заменить мок на реальный API вызов
-            await new Promise(resolve => setTimeout(resolve, 500));
+            await new Promise((resolve) => setTimeout(resolve, 500));
             const mockedIds = [1, 3, 7]; // мокнутые ID пересаженных героев
             setOperationResult({
                 type: "addCar",
                 teamId: teamId,
-                ids: mockedIds
+                ids: mockedIds,
             });
             setTeamId("");
         } catch (error) {
@@ -401,43 +423,72 @@ export default function MainPage() {
     };
 
     return (
-        <Box sx={{p: 4, minHeight: "100vh", bgcolor: "background.default"}}>
-            <Box sx={{mb: 3, display: "flex", alignItems: "center", position: "relative"}}>
-                <Typography variant="h4" sx={{color: "primary.main", fontWeight: 600}}>Human Beings</Typography>
+        <Box sx={{ p: 4, minHeight: "100vh", bgcolor: "background.default" }}>
+            <Box
+                sx={{
+                    mb: 3,
+                    display: "flex",
+                    alignItems: "center",
+                    position: "relative",
+                }}
+            >
+                <Typography
+                    variant="h4"
+                    sx={{ color: "primary.main", fontWeight: 600 }}
+                >
+                    Human Beings
+                </Typography>
 
-                <Box sx={{ display: "flex", gap: 2, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)"}}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        gap: 2,
+                        alignItems: "center",
+                        position: "absolute",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                    }}
+                >
                     <TextField
                         label="Search by ID"
                         size="small"
                         value={searchId}
-                        onChange={e => setSearchId(e.target.value)}
-                        onKeyPress={e => {
-                            if (e.key === "Enter") handleSearch()
+                        onChange={(e) => setSearchId(e.target.value)}
+                        onKeyPress={(e) => {
+                            if (e.key === "Enter") handleSearch();
                         }}
-                        sx={{width: 150}}
+                        sx={{ width: 150 }}
                     />
                     <IconButton
                         color="primary"
                         onClick={handleSearch}
-                        sx={{bgcolor: "primary.main", color: "white", "&:hover": {bgcolor: "primary.dark"}}}
+                        sx={{
+                            bgcolor: "primary.main",
+                            color: "white",
+                            "&:hover": { bgcolor: "primary.dark" },
+                        }}
                     >
-                        <SearchIcon/>
+                        <SearchIcon />
                     </IconButton>
                     {searchId && (
-                        <Button variant="outlined" color="primary" onClick={handleClearSearch}
-                                sx={{textTransform: "none"}}>
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={handleClearSearch}
+                            sx={{ textTransform: "none" }}
+                        >
                             Clear
                         </Button>
                     )}
                 </Box>
 
-                <Box sx={{marginLeft: "auto"}}>
+                <Box sx={{ marginLeft: "auto" }}>
                     <Button
                         variant="contained"
                         color="primary"
-                        startIcon={<AddIcon/>}
+                        startIcon={<AddIcon />}
                         onClick={handleOpenAddDialog}
-                        sx={{textTransform: "none"}}
+                        sx={{ textTransform: "none" }}
                         disabled={hasError || isLoading}
                     >
                         Add New
@@ -445,8 +496,16 @@ export default function MainPage() {
                 </Box>
             </Box>
 
-            <Box sx={{mb: 3, display: "flex", alignItems: "center", width: "100%", position: "relative"}}>
-                <Box sx={{display: "flex", gap: 1, alignItems: "center"}}>
+            <Box
+                sx={{
+                    mb: 3,
+                    display: "flex",
+                    alignItems: "center",
+                    width: "100%",
+                    position: "relative",
+                }}
+            >
+                <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
                     <TextField
                         label="Mood value"
                         size="small"
@@ -463,62 +522,100 @@ export default function MainPage() {
                                 e.preventDefault();
                             }
                         }}
-                        inputProps={{inputMode: "numeric", pattern: "-?[0-9]*"}}
+                        inputProps={{
+                            inputMode: "numeric",
+                            pattern: "-?[0-9]*",
+                        }}
                     />
                     <IconButton
                         color="primary"
                         onClick={handleCountByMood}
-                        sx={{bgcolor: "primary.main", color: "white", "&:hover": {bgcolor: "primary.dark"}}}
+                        sx={{
+                            bgcolor: "primary.main",
+                            color: "white",
+                            "&:hover": { bgcolor: "primary.dark" },
+                        }}
                         title="Count objects with mood less than value"
                     >
-                        <NumbersIcon/>
+                        <NumbersIcon />
                     </IconButton>
                 </Box>
 
-                <Box sx={{display: "flex", gap: 1, alignItems: "center", position: "absolute", left: "50%", transform: "translateX(-50%)"}}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        gap: 1,
+                        alignItems: "center",
+                        position: "absolute",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                    }}
+                >
                     <TextField
                         label="Name prefix"
                         size="small"
                         value={namePrefix}
-                        onChange={e => setNamePrefix(e.target.value)}
+                        onChange={(e) => setNamePrefix(e.target.value)}
                     />
                     <IconButton
                         color="primary"
                         onClick={handleFilterByName}
-                        sx={{bgcolor: "primary.main", color: "white", "&:hover": {bgcolor: "primary.dark"}}}
+                        sx={{
+                            bgcolor: "primary.main",
+                            color: "white",
+                            "&:hover": { bgcolor: "primary.dark" },
+                        }}
                         title="Filter by name prefix"
                     >
-                        <FilterListIcon/>
+                        <FilterListIcon />
                     </IconButton>
                     {namePrefix && (
-                        <Button variant="outlined" color="primary" onClick={handleClearNameFilter}
-                                sx={{textTransform: "none"}}>
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={handleClearNameFilter}
+                            sx={{ textTransform: "none" }}
+                        >
                             Clear
                         </Button>
                     )}
                 </Box>
 
-                <Box sx={{display: "flex", gap: 1, alignItems: "center", marginLeft: "auto"}}>
+                <Box
+                    sx={{
+                        display: "flex",
+                        gap: 1,
+                        alignItems: "center",
+                        marginLeft: "auto",
+                    }}
+                >
                     <IconButton
                         color="primary"
                         onClick={handleGetUniqueSpeeds}
-                        sx={{bgcolor: "primary.main", color: "white", "&:hover": {bgcolor: "primary.dark"}}}
+                        sx={{
+                            bgcolor: "primary.main",
+                            color: "white",
+                            "&:hover": { bgcolor: "primary.dark" },
+                        }}
                         title="Get unique impact speeds"
                     >
-                        <SpeedIcon/>
+                        <SpeedIcon />
                     </IconButton>
-                    <Typography variant="body2" sx={{color: "text.secondary", whiteSpace: "nowrap"}}>
+                    <Typography
+                        variant="body2"
+                        sx={{ color: "text.secondary", whiteSpace: "nowrap" }}
+                    >
                         Unique Speeds
                     </Typography>
                 </Box>
             </Box>
 
-            <Box sx={{mb: 3, display: "flex", alignItems: "center", gap: 2}}>
+            <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 2 }}>
                 <Button
                     variant="contained"
                     color="error"
                     onClick={handleRemoveWithoutToothpick}
-                    sx={{textTransform: "none"}}
+                    sx={{ textTransform: "none" }}
                 >
                     Remove Without Toothpick
                 </Button>
@@ -527,53 +624,76 @@ export default function MainPage() {
                     size="small"
                     value={teamId}
                     onChange={(e) => setTeamId(e.target.value)}
-                    sx={{width: 120}}
+                    sx={{ width: 120 }}
                 />
                 <Button
                     variant="contained"
                     color="secondary"
                     onClick={handleAddCarToTeam}
-                    sx={{textTransform: "none"}}
+                    sx={{ textTransform: "none" }}
                 >
                     Transfer to red Lada Kalina
                 </Button>
             </Box>
 
             {operationResult && (
-                <Box sx={{mb: 2}}>
+                <Box sx={{ mb: 2 }}>
                     {operationResult.type === "mood" && (
-                        <Alert severity="info" onClose={() => setOperationResult(null)}>
-                            Count of objects with mood less
-                            than {operationResult.moodValueAtQuery}: <strong>{operationResult.value}</strong>
+                        <Alert
+                            severity="info"
+                            onClose={() => setOperationResult(null)}
+                        >
+                            Count of objects with mood less than{" "}
+                            {operationResult.moodValueAtQuery}:{" "}
+                            <strong>{operationResult.value}</strong>
                         </Alert>
                     )}
                     {operationResult.type === "name" && (
-                        <Alert severity="info" onClose={() => setOperationResult(null)}>
-                            Found <strong>{operationResult.value}</strong> objects with name starting with
-                            "{operationResult.namePrefixAtQuery}"
+                        <Alert
+                            severity="info"
+                            onClose={() => setOperationResult(null)}
+                        >
+                            Found <strong>{operationResult.value}</strong>{" "}
+                            objects with name starting with "
+                            {operationResult.namePrefixAtQuery}"
                         </Alert>
                     )}
                     {operationResult.type === "speeds" && (
-                        <Alert severity="info" onClose={() => setOperationResult(null)}>
+                        <Alert
+                            severity="info"
+                            onClose={() => setOperationResult(null)}
+                        >
                             Unique impact speeds:{" "}
                             {operationResult.value.map((speed, i) => (
                                 <Chip
                                     key={i}
                                     label={speed}
                                     size="small"
-                                    sx={{ml: 0.5, bgcolor: "primary.light", color: "white"}}
+                                    sx={{
+                                        ml: 0.5,
+                                        bgcolor: "primary.light",
+                                        color: "white",
+                                    }}
                                 />
                             ))}
                         </Alert>
                     )}
                     {operationResult?.type === "removeToothpick" && (
-                        <Alert severity="success" onClose={() => setOperationResult(null)}>
-                            Из команды <strong>{operationResult.teamId}</strong> удалены все герои без зубочисток.
+                        <Alert
+                            severity="success"
+                            onClose={() => setOperationResult(null)}
+                        >
+                            Из команды <strong>{operationResult.teamId}</strong>{" "}
+                            удалены все герои без зубочисток.
                         </Alert>
                     )}
                     {operationResult?.type === "addCar" && (
-                        <Alert severity="info" onClose={() => setOperationResult(null)}>
-                            В команде <strong>{operationResult.teamId}</strong> пересажены герои с ID:{" "}
+                        <Alert
+                            severity="info"
+                            onClose={() => setOperationResult(null)}
+                        >
+                            В команде <strong>{operationResult.teamId}</strong>{" "}
+                            пересажены герои с ID:{" "}
                             {operationResult.ids.join(", ")}
                         </Alert>
                     )}
@@ -581,12 +701,12 @@ export default function MainPage() {
             )}
 
             {isLoading && (
-                <Box sx={{display: "flex", justifyContent: "center", my: 4}}>
-                    <CircularProgress/>
+                <Box sx={{ display: "flex", justifyContent: "center", my: 4 }}>
+                    <CircularProgress />
                 </Box>
             )}
             {hasError && (
-                <Alert severity="error" sx={{my: 2}}>
+                <Alert severity="error" sx={{ my: 2 }}>
                     Не удалось загрузить данные с сервера. Попробуйте снова.
                 </Alert>
             )}
@@ -604,7 +724,7 @@ export default function MainPage() {
             )}
 
             {!isLoading && !hasError && (
-                <Box sx={{display: "flex", justifyContent: "center", mt: 2}}>
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
                     <Pagination
                         count={totalPages}
                         page={page + 1}
@@ -625,5 +745,6 @@ export default function MainPage() {
                 MOODS={MOODS}
             />
         </Box>
-    )
+    );
 }
+
