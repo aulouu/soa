@@ -8,6 +8,8 @@ import itmo.soa.service1.model.*;
 import itmo.soa.service1.repo.HumanBeingRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,11 +76,9 @@ public class HumanBeingService {
         }
     }
 
-    public List<HumanBeingResponse> getAllHumanBeings() {
-        List<HumanBeing> humanBeings = humanBeingRepository.findAll();
-        return humanBeings.stream()
-                .map(hb -> modelMapper.map(hb, HumanBeingResponse.class))
-                .collect(Collectors.toList());
+    public Page<HumanBeingResponse> getAllHumanBeings(Pageable pageable) {
+        Page<HumanBeing> humanBeings = humanBeingRepository.findAll(pageable);
+        return humanBeings.map(hb -> modelMapper.map(hb, HumanBeingResponse.class));
     }
 
     public HumanBeingResponse getHumanBeingById(Long id) {

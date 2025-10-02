@@ -9,7 +9,8 @@ import {
     Typography,
     ThemeProvider,
     Alert,
-    Chip
+    Chip,
+    Pagination
 } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
@@ -37,6 +38,7 @@ import HumanBeingDialog from "./components/HumanBeingDialog";
 export default function MainPage() {
     const WEAPON_TYPES = ['HAMMER', 'AXE', 'PISTOL', 'RIFLE', 'KNIFE'];
     const MOODS = ['SADNESS', 'SORROW', 'APATHY', 'FRENZY'];
+    const PAGE_SIZE = 10;
 
     const [humanBeings, setHumanBeings] = useState([]);
     const [filteredHumanBeings, setFilteredHumanBeings] = useState([]);
@@ -58,18 +60,23 @@ export default function MainPage() {
     const [namePrefix, setNamePrefix] = useState("");
     const [uniqueSpeeds, setUniqueSpeeds] = useState([]);
     const [operationResult, setOperationResult] = useState(null);
+    const [page, setPage] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
     useEffect(() => {
-        loadAllHumanBeings();
+        loadHumanBeingsPage(0);
     }, []);
 
-    const loadAllHumanBeings = async () => {
+    const loadHumanBeingsPage = async (pageNumber = 0) => {
         try {
-            const data = await fetchAllHumanBeings();
-            setHumanBeings(data);
-            setFilteredHumanBeings(data);
+            const data = await fetchAllHumanBeings(pageNumber, PAGE_SIZE);
+            setHumanBeings(data.content);
+            setFilteredHumanBeings(data.content);
+            setTotalPages(data.totalPages);
+            setPage(data.number);
         } catch (error) {
             console.error(error);
+            toast.error(error.message);
         }
     };
 
@@ -148,7 +155,7 @@ export default function MainPage() {
             });
             toast.success("HumanBeing added successfully");
             handleCloseDialog();
-            loadAllHumanBeings();
+            loadHumanBeingsPage(page);
         } catch (error) {
             toast.error(error.message);
         }
@@ -169,7 +176,7 @@ export default function MainPage() {
             });
             toast.success("HumanBeing updated successfully");
             handleCloseDialog();
-            loadAllHumanBeings();
+            loadHumanBeingsPage(page);
         } catch (error) {
             toast.error(error.message);
         }
@@ -179,7 +186,7 @@ export default function MainPage() {
         try {
             await deleteHumanBeing(id);
             toast.success("HumanBeing deleted successfully");
-            loadAllHumanBeings();
+            loadHumanBeingsPage(page);
         } catch (error) {
             toast.error(error.message);
         }
@@ -235,7 +242,7 @@ export default function MainPage() {
 
     const handleClearSearch = () => {
         setSearchId("");
-        setFilteredHumanBeings(humanBeings);
+        loadHumanBeingsPage(page);
     };
 
     const handleCountByMood = async () => {
@@ -277,7 +284,7 @@ export default function MainPage() {
 
     const handleClearNameFilter = () => {
         setNamePrefix("");
-        setFilteredHumanBeings(humanBeings);
+        loadHumanBeingsPage(page);
         setOperationResult(null);
     };
 
@@ -296,7 +303,6 @@ export default function MainPage() {
             <ToastContainer />
             <Box sx={{ p: 4, minHeight: "100vh", bgcolor: "background.default" }}>
 
-                {/* Header & Search */}
                 <Box sx={{ mb: 3, display: "flex", alignItems: "center", position: "relative" }}>
                     <Typography variant="h4" sx={{ color: "primary.main", fontWeight: 600 }}>Human Beings</Typography>
 
@@ -446,6 +452,15 @@ export default function MainPage() {
                     onDelete={handleDelete}
                     formatDate={formatDateForDisplay}
                 />
+
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                    <Pagination
+                        count={totalPages}
+                        page={page + 1}
+                        onChange={(e, value) => loadHumanBeingsPage(value - 1)}
+                        color="primary"
+                    />
+                </Box>
 
                 <HumanBeingDialog
                     open={openDialog}

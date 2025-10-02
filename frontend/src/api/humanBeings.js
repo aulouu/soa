@@ -1,8 +1,8 @@
 const BASE_URL = 'http://localhost:2468/api/human-beings';
 const STATISTICS_URL = 'http://localhost:2468/api/statistics';
 
-export const fetchAllHumanBeings = async () => {
-    const res = await fetch(BASE_URL);
+export const fetchAllHumanBeings = async (page = 0, size = 10) => {
+    const res = await fetch(`${BASE_URL}?page=${page}&size=${size}`);
     if (!res.ok) throw new Error("Failed to fetch human beings");
     return res.json();
 };

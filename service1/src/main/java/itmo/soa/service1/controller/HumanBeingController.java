@@ -5,6 +5,8 @@ import itmo.soa.service1.dto.HumanBeingResponse;
 import itmo.soa.service1.service.HumanBeingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,8 +18,8 @@ public class HumanBeingController {
     private final HumanBeingService humanBeingService;
 
     @GetMapping
-    public List<HumanBeingResponse> getAllHumanBeings() {
-        return humanBeingService.getAllHumanBeings();
+    public Page<HumanBeingResponse> getAllHumanBeings(Pageable pageable) {
+        return humanBeingService.getAllHumanBeings(pageable);
     }
 
     @GetMapping("/{id}")
