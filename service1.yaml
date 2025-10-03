@@ -434,11 +434,11 @@ components:
 
     WeaponType:
       type: string
-      enum: [ HAMMER, AXE, PISTOL, RIFLE, KNIFE ]
+      enum: [HAMMER, AXE, PISTOL, RIFLE, KNIFE]
 
     Mood:
       type: string
-      enum: [ SADNESS, SORROW, APATHY, FRENZY ]
+      enum: [SADNESS, SORROW, APATHY, FRENZY]
 
     Car:
       type: object

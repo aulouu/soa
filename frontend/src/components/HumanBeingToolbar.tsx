@@ -177,7 +177,7 @@ export const HumanBeingToolbar: React.FC<HumanBeingToolbarProps> = ({
             value={filters.teamId}
             onChange={handleFilterChange}
           />
-          <TextField
+          {/* <TextField
             type='datetime-local'
             name='createdAfter'
             label='Создано после'
@@ -185,7 +185,7 @@ export const HumanBeingToolbar: React.FC<HumanBeingToolbarProps> = ({
             InputLabelProps={{ shrink: true }}
             value={filters.createdAfter}
             onChange={handleFilterChange}
-          />
+          /> */}
           <Tooltip title='Применить фильтры'>
             <IconButton
               color='primary'
