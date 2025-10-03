@@ -213,7 +213,7 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
 
-  /statistics/mood-count:
+  /statistics/mood-count/{mood}:
     get:
       summary: Статистика по настроениям - количество объектов с mood меньше заданного
       tags:
@@ -222,8 +222,8 @@ paths:
         Возвращает количество объектов HumanBeing, значение поля mood которых меньше заданного.
         Обязательная операция согласно заданию лабораторной работы.
       parameters:
-        - name: threshold
-          in: query
+        - name: mood
+          in: path
           required: true
           description: Пороговое значение для сравнения mood
           schema:
@@ -238,6 +238,36 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+
+  /statistics/name/starts-with/{substring}:
+    get:
+      summary: Массив объектов, значение name которых начинается с заданной подстроки
+      tags:
+        - Статистика
+      description: |
+        Возвращает список объектов HumanBeing, у которых поле name начинается с переданной подстроки.
+        Обязательная операция согласно заданию лабораторной работы.
+      parameters:
+        - name: substring
+          in: path
+          required: true
+          description: Подстрока-префикс
+          schema:
+            type: string
+            example: "Alex"
+      responses:
+        "200":
+          description: Список объектов (JSON)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HumanBeingList"
         "400":
           $ref: "#/components/responses/BadRequest"
         "500":
@@ -260,35 +290,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ImpactSpeedList"
-        "500":
-          $ref: "#/components/responses/InternalError"
-        "503":
-          $ref: "#/components/responses/ServiceUnavailable"
-
-  /human-beings/name/starts-with:
-    get:
-      summary: Массив объектов, значение name которых начинается с заданной подстроки
-      tags:
-        - Статистика
-      description: |
-        Возвращает список объектов HumanBeing, у которых поле name начинается с переданного префикса.
-        Обязательная операция согласно заданию лабораторной работы.
-      parameters:
-        - name: prefix
-          in: query
-          required: true
-          description: Подстрока-префикс
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Список объектов (JSON)
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/HumanBeingList"
-        "400":
-          $ref: "#/components/responses/BadRequest"
         "500":
           $ref: "#/components/responses/InternalError"
         "503":
