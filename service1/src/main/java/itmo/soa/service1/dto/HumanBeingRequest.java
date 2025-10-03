@@ -13,13 +13,13 @@ import lombok.*;
 @Builder
 public class HumanBeingRequest {
 
-  private String name;
-  private Coordinates coordinates;
-  private Boolean realHero;
-  private Boolean hasToothpick;
-  private Integer impactSpeed;
-  private WeaponType weaponType;
-  private Mood mood;
-  private Car car;
-  private Integer teamId;
+    private String name;
+    private Coordinates coordinates;
+    private Boolean realHero;
+    private Boolean hasToothpick;
+    private Integer impactSpeed;
+    private WeaponType weaponType;
+    private Mood mood;
+    private Car car;
+    private Integer teamId;
 }

@@ -8,18 +8,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class Mapper {
 
-  @Bean
-  public ModelMapper modelMapper() {
-    ModelMapper mapper = new ModelMapper();
-    mapper
-      .getConfiguration()
-      .setFieldMatchingEnabled(true)
-      .setFieldAccessLevel(
-        org.modelmapper.config.Configuration.AccessLevel.PRIVATE
-      )
-      .setAmbiguityIgnored(true)
-      .setMatchingStrategy(MatchingStrategies.STRICT)
-      .setSkipNullEnabled(true);
-    return mapper;
-  }
+    @Bean
+    public ModelMapper modelMapper() {
+        ModelMapper mapper = new ModelMapper();
+        mapper
+                .getConfiguration()
+                .setFieldMatchingEnabled(true)
+                .setFieldAccessLevel(
+                        org.modelmapper.config.Configuration.AccessLevel.PRIVATE
+                )
+                .setAmbiguityIgnored(true)
+                .setMatchingStrategy(MatchingStrategies.STRICT)
+                .setSkipNullEnabled(true);
+        return mapper;
+    }
 }

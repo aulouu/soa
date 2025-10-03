@@ -1,8 +1,8 @@
 package itmo.soa.service2.model;
 
 public enum Mood {
-  SADNESS,
-  SORROW,
-  APATHY,
-  FRENZY,
+    SADNESS,
+    SORROW,
+    APATHY,
+    FRENZY,
 }

@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 class FaviconController {
 
-  @RequestMapping("/favicon.ico")
-  ResponseEntity<Void> favicon() {
-    return ResponseEntity.noContent().build();
-  }
+    @RequestMapping("/favicon.ico")
+    ResponseEntity<Void> favicon() {
+        return ResponseEntity.noContent().build();
+    }
 }
