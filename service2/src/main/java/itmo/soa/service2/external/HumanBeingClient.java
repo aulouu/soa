@@ -23,7 +23,7 @@ import java.util.Map;
 public class HumanBeingClient {
 
     private static final String BASE_URL =
-            "https://localhost:8449/api/human-beings";
+            "https://localhost:37449/api/human-beings";
 
     private static HumanBeingResponse mapToHumanBeingResponse(
             Map<String, Object> item
