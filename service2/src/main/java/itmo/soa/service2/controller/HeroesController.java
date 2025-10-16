@@ -2,6 +2,7 @@ package itmo.soa.service2.controller;
 
 import itmo.soa.service2.service.HeroesService;
 
+import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -10,6 +11,7 @@ import javax.ws.rs.core.Response;
 @Path("/heroes")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@PermitAll // Эта аннотация критически важна
 public class HeroesController {
     @Inject
     private HeroesService heroesService;
@@ -29,16 +31,5 @@ public class HeroesController {
     @Path("/team/{teamId}/car/add")
     public Response addCarToTeam(@PathParam("teamId") long teamId) {
         return heroesService.addCarToTeam(teamId);
-    }
-
-    // Явная обработка OPTIONS запросов
-    @OPTIONS
-    @Path("{path:.*}")
-    public Response handleOptions() {
-        return Response.ok()
-                .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-                .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization, X-Requested-With")
-                .build();
     }
 }
