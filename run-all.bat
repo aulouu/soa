@@ -39,12 +39,12 @@ call mvn -q -f "%ROOT_DIR%\service2" -DskipTests clean package
 REM ===== Logs =====
 if not exist "%ROOT_DIR%\logs" mkdir "%ROOT_DIR%\logs"
 
-echo Starting service1 (Spring Boot, HTTPS 8443)...
+echo Starting service1 (Spring Boot, HTTPS 8449)...
 start "service1" cmd /c "cd /d %ROOT_DIR%\service1 && mvn -q spring-boot:run > %ROOT_DIR%\logs\service1.log 2>&1"
 
 timeout /t 8 > nul
 
-echo Starting service2 (Payara Micro JAR, HTTPS 8643)...
+echo Starting service2 (Payara Micro JAR, HTTPS 8448)...
 for %%f in ("%ROOT_DIR%\service2\target\*.war") do set SERVICE2_WAR=%%f
 
 if not exist "%SERVICE2_WAR%" (
@@ -58,12 +58,12 @@ if not exist "%PAYARA_JAR%" (
 )
 
 set JAVA_OPTS=-Djavax.net.ssl.trustStore=%ROOT_DIR%\service2\ssl\truststore.p12 -Djavax.net.ssl.trustStorePassword=changeit
-start "service2" cmd /c "java %JAVA_OPTS% -jar %PAYARA_JAR% --deploy %SERVICE2_WAR% --contextRoot / --sslPort 8643 --nocluster > %ROOT_DIR%\logs\service2.log 2>&1"
+start "service2" cmd /c "java %JAVA_OPTS% -jar %PAYARA_JAR% --deploy %SERVICE2_WAR% --contextRoot / --sslPort 8448 --nocluster > %ROOT_DIR%\logs\service2.log 2>&1"
 
 echo.
 echo Services are starting...
-echo service1: https://localhost:8443/api/human-beings
-echo service2: https://localhost:8643/api/heroes
+echo service1: https://localhost:8449/api/human-beings
+echo service2: https://localhost:8448/api/heroes
 echo.
 echo Logs: %ROOT_DIR%\logs
 pause
