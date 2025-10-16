@@ -44,7 +44,7 @@ start "service1" cmd /c "cd /d %ROOT_DIR%\service1 && mvn -q spring-boot:run > %
 
 timeout /t 8 > nul
 
-echo Starting service2 (Payara Micro JAR, HTTPS 8448)...
+echo Starting service2 (Payara Micro JAR, HTTPS 8672)...
 for %%f in ("%ROOT_DIR%\service2\target\*.war") do set SERVICE2_WAR=%%f
 
 if not exist "%SERVICE2_WAR%" (
@@ -58,12 +58,12 @@ if not exist "%PAYARA_JAR%" (
 )
 
 set JAVA_OPTS=-Djavax.net.ssl.trustStore=%ROOT_DIR%\service2\ssl\truststore.p12 -Djavax.net.ssl.trustStorePassword=changeit
-start "service2" cmd /c "java %JAVA_OPTS% -jar %PAYARA_JAR% --deploy %SERVICE2_WAR% --contextRoot / --sslPort 8448 --nocluster > %ROOT_DIR%\logs\service2.log 2>&1"
+start "service2" cmd /c "java %JAVA_OPTS% -jar %PAYARA_JAR% --deploy %SERVICE2_WAR% --contextRoot / --sslPort 8672 --nocluster > %ROOT_DIR%\logs\service2.log 2>&1"
 
 echo.
 echo Services are starting...
 echo service1: https://localhost:8449/api/human-beings
-echo service2: https://localhost:8448/api/heroes
+echo service2: https://localhost:8672/api/heroes
 echo.
 echo Logs: %ROOT_DIR%\logs
 pause

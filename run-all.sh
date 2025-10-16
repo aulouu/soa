@@ -40,7 +40,7 @@ mkdir -p "$ROOT_DIR/logs"
 ) &
 sleep 8
 
-echo "Starting service2 (Payara Micro JAR, HTTPS 8448, HTTP disabled) ..."
+echo "Starting service2 (Payara Micro JAR, HTTPS 8672, HTTP disabled) ..."
 SERVICE2_WAR=$(ls -1 "$ROOT_DIR/service2/target"/*.war 2>/dev/null | head -n 1 || true)
 if [ -z "$SERVICE2_WAR" ]; then
   echo "ERROR: service2 WAR was not found in service2/target. Did the build succeed?" >&2
@@ -57,13 +57,13 @@ JAVA_OPTS="-Djavax.net.ssl.trustStore=$ROOT_DIR/service2/ssl/truststore.p12 -Dja
   java $JAVA_OPTS -jar "$PAYARA_JAR" \
     --deploy "$SERVICE2_WAR" \
     --contextRoot / \
-    --sslPort 8448 \
+    --sslPort 8672 \
     --nocluster | tee -a "$ROOT_DIR/logs/service2.log"
 ) &
 
 echo "\nServices are starting..."
 echo "service1: https://localhost:8449/api/human-beings"
-echo "service2: https://localhost:8448/api/heroes"
+echo "service2: https://localhost:8672/api/heroes"
 echo "\nTailing logs (press Ctrl+C to stop)..."
 tail -n +1 -f "$ROOT_DIR/logs/service1.log" "$ROOT_DIR/logs/service2.log"
 wait

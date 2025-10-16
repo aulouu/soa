@@ -10,7 +10,7 @@ export const apiClient = axios.create({
 // Инстанс для второго сервиса
 export const service2Client = axios.create({
     // baseURL: "/s2/api/heroes",
-    baseURL: "https://localhost:8448",
+    baseURL: "https://localhost:8672",
 });
 
 // Централизованный обработчик ошибок (без изменений)

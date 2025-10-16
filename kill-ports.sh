@@ -2,10 +2,10 @@
 set -euo pipefail
 
 # Usage:
-#   ./kill-ports.sh            # kills defaults: 8080 2468 8449 8448 5173
+#   ./kill-ports.sh            # kills defaults: 8080 2468 8449 8672 5173
 #   ./kill-ports.sh 3000 8080  # kills specific ports
 
-DEFAULT_PORTS=(8080 2468 8449 8448 5173)
+DEFAULT_PORTS=(8080 2468 8449 8672 5173)
 
 if [ "$#" -gt 0 ]; then
   PORTS=("$@")

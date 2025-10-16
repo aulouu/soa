@@ -9,7 +9,7 @@ echo "Using temporary directory: $TMP_DIR"
 mkdir -p "$LOG_DIR" "$TMP_DIR"
 
 SPRING_PORT=8449
-PAYARA_PORT=8448
+PAYARA_PORT=8672
 
 # Функция для освобождения порта
 free_port() {
