@@ -8,3 +8,7 @@ set configs.config.server-config.jmx-service.jmx-connector.system.enabled=false
 set configs.config.server-config.monitoring-service.enabled=false
 set configs.config.server-config.request-tracing-service.enabled=false
 set configs.config.server-config.microprofile-fault-tolerance-service.enabled=false
+
+# Исправленные команды безопасности
+set configs.config.server-config.security-service.activate-default-principal-to-role-mapping=true
+create-file-user --groups users --userpassword password123 user

@@ -39,6 +39,9 @@ set configs.config.server-config.jmx-service.jmx-connector.system.enabled=false
 set configs.config.server-config.monitoring-service.enabled=false
 set configs.config.server-config.request-tracing-service.enabled=false
 set configs.config.server-config.microprofile-fault-tolerance-service.enabled=false
+
+# Исправленные команды безопасности
+create-file-user --groups users --userpassword password user
 EOF
 
 echo "Starting service1 (Spring Boot, HTTPS 37449) with minimal resources..."
@@ -85,7 +88,7 @@ PAYARA_OPTS="\
   -Dfish.payara.nucleus.grizzly.max-queued-requests=5 \
   -Dfish.payara.nucleus.grizzly.thread-queue-capacity=5"
 
-(
+( 
   java $PAYARA_OPTS -jar "$PAYARA_JAR" \
     --deploy "$SERVICE2_WAR" \
     --contextRoot / \

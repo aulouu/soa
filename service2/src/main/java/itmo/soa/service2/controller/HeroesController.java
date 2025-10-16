@@ -31,15 +31,14 @@ public class HeroesController {
         return heroesService.addCarToTeam(teamId);
     }
 
-    // Явная обработка OPTIONS запросов для CORS
+    // Явная обработка OPTIONS запросов
     @OPTIONS
     @Path("{path:.*}")
     public Response handleOptions() {
         return Response.ok()
                 .header("Access-Control-Allow-Origin", "*")
-                .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH")
+                .header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
                 .header("Access-Control-Allow-Headers", "origin, content-type, accept, authorization, X-Requested-With")
-                .header("Access-Control-Max-Age", "3600")
                 .build();
     }
 }

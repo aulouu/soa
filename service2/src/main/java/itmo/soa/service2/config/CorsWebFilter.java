@@ -16,6 +16,8 @@ public class CorsWebFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         
+        System.out.println("CorsWebFilter: " + httpRequest.getMethod() + " " + httpRequest.getRequestURI());
+        
         String origin = httpRequest.getHeader("Origin");
         if (origin == null) {
             origin = "*";
@@ -29,6 +31,7 @@ public class CorsWebFilter implements Filter {
         
         // Для OPTIONS запроса сразу возвращаем ответ
         if ("OPTIONS".equalsIgnoreCase(httpRequest.getMethod())) {
+            System.out.println("CorsWebFilter: Handling OPTIONS preflight");
             httpResponse.setStatus(HttpServletResponse.SC_OK);
             return;
         }
