@@ -40,8 +40,6 @@ set configs.config.server-config.monitoring-service.enabled=false
 set configs.config.server-config.request-tracing-service.enabled=false
 set configs.config.server-config.microprofile-fault-tolerance-service.enabled=false
 
-# Исправленные команды безопасности
-create-file-user --groups users --userpassword password user
 EOF
 
 echo "Starting service1 (Spring Boot, HTTPS 37449) with minimal resources..."
@@ -54,6 +52,8 @@ mkdir -p "$ROOT_DIR/logs"
 ) &
 SERVICE1_PID=$!
 sleep 30  # Даём время на запуск Spring Boot
+
+echo "password" > /tmp/payara-password.txt
 
 echo "Starting service2 (Payara Micro, HTTPS 37672) with Hazelcast and all unnecessary services disabled..."
 SERVICE2_WAR=$(ls -1 "$ROOT_DIR/service2/target"/*.war 2>/dev/null | head -n 1 || true)
