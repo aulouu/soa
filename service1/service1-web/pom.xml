@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>itmo.soa</groupId>
+        <artifactId>service1-jakarta</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>service1-web</artifactId>
+    <packaging>war</packaging>
+    <name>Service1 Web Module (WAR)</name>
+
+    <dependencies>
+        <!-- Зависимость от нашего EJB-модуля -->
+        <dependency>
+            <groupId>itmo.soa</groupId>
+            <artifactId>service1-ejb</artifactId>
+            <version>1.0.0</version>
+            <type>ejb</type>
+        </dependency>
+
+        <!-- Jakarta EE API - их предоставит сам WildFly -->
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        
+        <!-- Клиент для Consul - он нам нужен внутри WAR -->
+        <dependency>
+            <groupId>com.ecwid.consul</groupId>
+            <artifactId>consul-api</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <plugins>
+            <!-- Стандартный плагин для сборки WAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.3.2</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <!-- Включаем наш EJB JAR в WAR -->
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <!-- Плагин, который добавит EJB в наш WAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ejb-plugin</artifactId>
+                <version>3.2.1</version>
+                <configuration>
+                    <ejbVersion>3.2</ejbVersion>
+                    <generateClient>true</generateClient>
+                    <clientIncludes>
+                        <clientInclude>itmo/soa/service1/ejb/*Local.class</clientInclude>
+                    </clientIncludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

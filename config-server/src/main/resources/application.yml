@@ -1,0 +1,20 @@
+server:
+  port: 8888
+  # SSL отключен - не используется извне
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: classpath:/config
+  profiles:
+    active: native
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

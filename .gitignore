@@ -1,55 +1,44 @@
-# IDE
+# Compiled output
+target/
+*/target/
+build/
+out/
+
+# IDE files
 .idea/
 .vscode/
 *.iml
 *.ipr
 *.iws
+.project
+.classpath
+.settings/
 
-# Build outputs
-*/target/
-*/build/
-*/out/
+# Log files
+*.log
+logs/
 
-# Java
+# Dependencies
+node_modules/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# Other
+.serena
+hs_err_pid*
 *.class
 *.jar
 *.war
 *.ear
-*.nar
-hs_err_pid*
 
-# Maven
-.mvn/wrapper/maven-wrapper.jar
-.mvn/timing.properties
-.mvn/wrapper/MavenWrapperDownloader.java
-
-# Gradle
-.gradle/
-gradle/wrapper/gradle-wrapper.jar
-
-# Logs
-*.log
-logs/
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Temporary files
-*.tmp
-*.temp
-
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Environment
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-.serena
+*wildfly*/*

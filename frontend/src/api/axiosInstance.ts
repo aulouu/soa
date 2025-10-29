@@ -1,12 +1,18 @@
 import axios from "axios";
 import { toast } from "react-toastify";
+import config from "../config";
 
+// API клиент для human-beings-service (через Zuul Gateway)
 export const apiClient = axios.create({
-  baseURL: "https://localhost:37449",
+  baseURL: config.useGateway ? config.apiBaseUrl : config.service1Direct,
+  // Браузер автоматически обрабатывает HTTPS
+  // httpsAgent нужен только для Node.js окружения
 });
 
+// API клиент для heroes-service (через Zuul Gateway)
 export const service2Client = axios.create({
-  baseURL: "https://localhost:37672/api/heroes",
+  baseURL: config.useGateway ? config.heroesApi : `${config.service2Direct}/api/heroes`,
+  // Браузер автоматически обрабатывает HTTPS
 });
 
 const errorHandler = (error: any) => {

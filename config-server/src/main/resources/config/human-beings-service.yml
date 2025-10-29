@@ -1,0 +1,23 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: human-beings-service
+
+consul:
+  host: localhost
+  port: 8500
+  discovery:
+    enabled: true
+    register: true
+    service-name: ${spring.application.name}
+    health-check-interval: 10s
+    health-check-path: /health
+    instance-id: ${spring.application.name}:${random.value}
+
+# JPA конфигурация (если используется)
+spring.jpa:
+  show-sql: false
+  hibernate:
+    ddl-auto: update
