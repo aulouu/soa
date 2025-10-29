@@ -41,5 +41,12 @@ hs_err_pid*
 *.war
 *.ear
 
+consul
+
 *wildfly*/*
-*consul*/*
+*consul*/*consul/
+*.zip
+*.jar
+target/
+logs/
+wildfly-*/
