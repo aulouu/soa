@@ -24,11 +24,11 @@ zuul:
   routes:
     heroes-service:
       path: /api/heroes/**
-      url: http://localhost:8081
+      serviceId: heroes-service
       strip-prefix: false
     human-beings-service:
-      path: /api/human-beings/**
-      url: http://localhost:8082/service1-web
+      path: /api/**
+      serviceId: human-beings-service
       strip-prefix: false
   host:
     connect-timeout-millis: 10000
@@ -37,7 +37,7 @@ zuul:
 
 ribbon:
   eureka:
-    enabled: false
+    enabled: true  # Включаем Eureka для автоматической балансировки
   ConnectTimeout: 10000
   ReadTimeout: 60000
 

@@ -1,0 +1,23 @@
+# Cloudflare Tunnel Configuration for SOA Lab3
+# Автоматически сгенерировано Fri Oct 31 12:29:43 MSK 2025
+
+tunnel: soa-lab3
+credentials-file: cloudflared/credentials.json
+
+ingress:
+  # Frontend
+  - hostname: frontend-soa-lab3.trycloudflare.com
+    service: http://localhost:3000
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+  
+  # Zuul Gateway (API)
+  - hostname: api-soa-lab3.trycloudflare.com
+    service: http://localhost:8080
+    originRequest:
+      noTLSVerify: true
+      connectTimeout: 30s
+  
+  # Catch-all правило (обязательно)
+  - service: http_status:404

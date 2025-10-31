@@ -19,11 +19,9 @@ public class CorsConfig {
       new UrlBasedCorsConfigurationSource();
     CorsConfiguration config = new CorsConfiguration();
 
-    config.setAllowCredentials(true);
-    config.addAllowedOrigin("http://localhost:3000");
-    config.addAllowedOrigin("https://localhost:3000");
-    config.addAllowedOrigin("http://127.0.0.1:3000");
-    config.addAllowedOrigin("https://127.0.0.1:3000");
+    // Разрешаем все источники для работы через Cloudflare Tunnel
+    config.setAllowCredentials(false);
+    config.addAllowedOrigin("*");
     config.addAllowedHeader("*");
     config.addAllowedMethod("GET");
     config.addAllowedMethod("POST");

@@ -59,4 +59,9 @@ public interface HumanBeingServiceLocal {
    * Получить уникальные значения impactSpeed
    */
   List<Integer> getUniqueImpactSpeeds();
+
+  /**
+   * Получить количество HumanBeing, чьи имена начинаются с заданного префикса
+   */
+  long countByNameStartsWith(String prefix);
 }

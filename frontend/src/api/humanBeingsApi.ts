@@ -60,8 +60,8 @@ export const deleteHumanBeing = async (id: number): Promise<void> => {
 
 // --- Статистика ---
 
-export const countByMood = async (moodIndex: number): Promise<number> => {
-    const response = await apiClient.get<number>(
+export const countByMood = async (moodIndex: number): Promise<{ mood: string; count: number }> => {
+    const response = await apiClient.get<{ mood: string; count: number }>(
         `/api/statistics/mood-count/${moodIndex}`
     );
     return response.data;
@@ -69,8 +69,8 @@ export const countByMood = async (moodIndex: number): Promise<number> => {
 
 export const filterByNamePrefix = async (
     prefix: string
-): Promise<HumanBeing[]> => {
-    const response = await apiClient.get<HumanBeing[]>(
+): Promise<{ count: number; prefix: string }> => {
+    const response = await apiClient.get<{ count: number; prefix: string }>(
         `/api/statistics/name/starts-with/${prefix}`
     );
     return response.data;

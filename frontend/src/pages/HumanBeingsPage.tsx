@@ -155,13 +155,13 @@ const HumanBeingsPage: React.FC = () => {
 
   const handleCountByMood = async (mood: string) => {
     try {
-      const count = await humanBeingsApi.countByMood(parseInt(mood, 10));
+      const result = await humanBeingsApi.countByMood(parseInt(mood, 10));
       setOperationResult({
         title: "Подсчет по настроению",
         content: (
           <Typography>
-            Найдено <strong>{count}</strong> записей с настроением меньше чем{" "}
-            <strong>{mood}</strong>.
+            Найдено <strong>{result.count}</strong> записей с настроением{" "}
+            <strong>{result.mood}</strong>.
           </Typography>
         ),
       });
@@ -175,8 +175,8 @@ const HumanBeingsPage: React.FC = () => {
         title: `Результаты по префиксу "${prefix}"`,
         content: (
           <Typography>
-            Найдено <strong>{result.length}</strong> записей. ID:{" "}
-            {result.map((h) => h.id).join(", ")}
+            Найдено <strong>{result.count}</strong> записей, чьи имена начинаются с{" "}
+            <strong>"{result.prefix}"</strong>.
           </Typography>
         ),
       });

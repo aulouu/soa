@@ -247,6 +247,21 @@ public class HumanBeingServiceBean implements HumanBeingServiceLocal {
     return query.getResultList();
   }
 
+  @Override
+  public long countByNameStartsWith(String prefix) {
+    if (prefix == null || prefix.isEmpty()) {
+      throw new IllegalArgumentException("Prefix cannot be null or empty");
+    }
+    CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+    CriteriaQuery<Long> query = cb.createQuery(Long.class);
+    Root<HumanBeing> root = query.from(HumanBeing.class);
+    query.select(cb.count(root));
+    query.where(
+      cb.like(cb.lower(root.get("name")), prefix.toLowerCase() + "%")
+    );
+    return entityManager.createQuery(query).getSingleResult();
+  }
+
   private void validateHumanBeing(HumanBeing hb) {
     if (hb.getName() == null || hb.getName().isEmpty()) {
       throw new IllegalArgumentException("Name cannot be null or empty");

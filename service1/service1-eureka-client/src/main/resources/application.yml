@@ -1,9 +1,14 @@
 server:
-  port: 8089 # Другой порт! Не 8082
+  port: 8089 # Порт Eureka Client (прокси)
 
 spring:
   application:
-    name: human-beings-service # То же имя, что ищет Service2
+    name: human-beings-service # То же имя, что ищет Zuul
+
+# WildFly backend URL (переопределяется через переменную окружения для instance 2)
+service1:
+  wildfly:
+    url: ${WILDFLY_URL:http://localhost:8082/service1-web}
 
 eureka:
   client:
@@ -14,16 +19,17 @@ eureka:
   instance:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${server.port}
-    status-page-url: http://localhost:8082/service1-web/ # URL настоящего Service1
-    health-check-url: http://localhost:8082/service1-web/api/human-beings/health
-    home-page-url: http://localhost:8082/service1-web/
+    # Теперь status page указывает на сам Eureka Client, а не на WildFly
+    status-page-url: http://localhost:${server.port}/actuator/info
+    health-check-url: http://localhost:${server.port}/actuator/health
+    home-page-url: http://localhost:${server.port}/
 
 # Health check конфигурация
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics
   endpoint:
     health:
       show-details: always

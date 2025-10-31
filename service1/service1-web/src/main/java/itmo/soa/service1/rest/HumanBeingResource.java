@@ -150,6 +150,11 @@ public class HumanBeingResource {
       public List<Integer> getUniqueImpactSpeeds() {
         return List.of();
       }
+
+      @Override
+      public long countByNameStartsWith(String prefix) {
+        return 0;
+      }
     };
   }
 
@@ -325,6 +330,78 @@ public class HumanBeingResource {
       return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
         .entity(Map.of("error", e.getMessage()))
         .build();
+    }
+  }
+
+  // Statistics endpoints
+
+  @GET
+  @Path("/statistics/mood-count/{moodValue}")
+  public Response countByMood(@PathParam("moodValue") int moodValue) {
+    try {
+      // Convert moodValue to Mood enum
+      // 0=SADNESS, 1=SORROW, 2=APATHY, 3=FRENZY
+      Mood mood = convertMoodValue(moodValue);
+      long count = humanBeingService.countByMood(mood);
+      return Response.ok(Map.of("count", count, "mood", mood.toString())).build();
+    } catch (IllegalArgumentException e) {
+      return Response.status(Response.Status.BAD_REQUEST)
+        .entity(Map.of("error", e.getMessage()))
+        .build();
+    } catch (Exception e) {
+      logger.log(Level.SEVERE, "Error in countByMood endpoint", e);
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+        .entity(Map.of("error", e.getMessage()))
+        .build();
+    }
+  }
+
+  @GET
+  @Path("/statistics/name/starts-with/{prefix}")
+  public Response countByNameStartsWith(@PathParam("prefix") String prefix) {
+    try {
+      long count = humanBeingService.countByNameStartsWith(prefix);
+      return Response.ok(Map.of("count", count, "prefix", prefix)).build();
+    } catch (IllegalArgumentException e) {
+      return Response.status(Response.Status.BAD_REQUEST)
+        .entity(Map.of("error", e.getMessage()))
+        .build();
+    } catch (Exception e) {
+      logger.log(Level.SEVERE, "Error in countByNameStartsWith endpoint", e);
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+        .entity(Map.of("error", e.getMessage()))
+        .build();
+    }
+  }
+
+  @GET
+  @Path("/statistics/impact-speeds")
+  public Response getUniqueImpactSpeeds() {
+    try {
+      List<Integer> speeds = humanBeingService.getUniqueImpactSpeeds();
+      return Response.ok(speeds).build();
+    } catch (Exception e) {
+      logger.log(Level.SEVERE, "Error in getUniqueImpactSpeeds endpoint", e);
+      return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+        .entity(Map.of("error", e.getMessage()))
+        .build();
+    }
+  }
+
+  private Mood convertMoodValue(int value) {
+    switch (value) {
+      case 0:
+        return Mood.SADNESS;
+      case 1:
+        return Mood.SORROW;
+      case 2:
+        return Mood.APATHY;
+      case 3:
+        return Mood.FRENZY;
+      default:
+        throw new IllegalArgumentException(
+          "Invalid mood value: " + value + ". Must be 0-3"
+        );
     }
   }
 }

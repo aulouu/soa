@@ -16,10 +16,10 @@ public class CorsFilter implements ContainerResponseFilter {
   ) throws IOException {
     responseContext
       .getHeaders()
-      .add("Access-Control-Allow-Origin", "http://localhost:3000");
+      .add("Access-Control-Allow-Origin", "*");
     responseContext
       .getHeaders()
-      .add("Access-Control-Allow-Credentials", "true");
+      .add("Access-Control-Allow-Credentials", "false");
     responseContext
       .getHeaders()
       .add(
