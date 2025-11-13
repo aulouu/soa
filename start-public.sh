@@ -9,31 +9,22 @@ echo "║   Запуск SOA Lab3 с публичным доступом        
 echo "╚═══════════════════════════════════════════════════════╝"
 echo ""
 
-# 1. Включаем Cloudflare в конфиге если еще не включен
+# 1. Включаем Cloudflare в конфиге
 if ! grep -q "CLOUDFLARED_ENABLED=true" config.env; then
     echo "Включение Cloudflare Tunnel в config.env..."
     sed -i.bak 's/CLOUDFLARED_ENABLED=false/CLOUDFLARED_ENABLED=true/' config.env
 fi
 
-# 2. Запускаем backend
-echo "=== Запуск Backend сервисов ==="
-./start.sh --backend &
-BACKEND_PID=$!
+# 2. Запускаем backend (с Cloudflare, т.к. CLOUDFLARED_ENABLED=true)
+echo "=== Запуск Backend сервисов (включая Cloudflare Tunnels) ==="
+./start.sh --backend
 
-# Ждём пока backend запустится
-echo "Ожидание запуска Backend (это может занять до 2 минут)..."
-sleep 90
+# Backend уже запустил Cloudflare, не нужно запускать заново
 
-# 3. Запускаем Cloudflare туннели
-echo ""
-echo "=== Запуск Cloudflare Tunnels ==="
-cd scripts && ./start-cloudflared.sh && cd ..
-
-# 4. Запускаем Frontend
+# 3. Запускаем Frontend
 echo ""
 echo "=== Запуск Frontend ==="
 
-# Frontend функция из start.sh
 source config.env
 
 cd frontend
@@ -54,22 +45,17 @@ EOF
 
 echo "Запуск Frontend (dev режим) с API URL: $API_URL"
 
-# Убиваем старый Frontend если он был запущен
-if [ -f "../logs/frontend.pid" ]; then
-    OLD_PID=$(cat ../logs/frontend.pid)
-    kill $OLD_PID 2>/dev/null || true
-    sleep 2
+# Проверяем не запущен ли уже frontend
+if [ -f "../logs/frontend.pid" ] && ps -p $(cat ../logs/frontend.pid) > /dev/null 2>&1; then
+    echo "✓ Frontend уже запущен"
+else
+    npm start > ../logs/frontend.log 2>&1 &
+    echo $! > ../logs/frontend.pid
+    echo "⏳ Ожидание компиляции React приложения (30 секунд)..."
+    sleep 30
 fi
 
-npm start > ../logs/frontend.log 2>&1 &
-echo $! > ../logs/frontend.pid
-
 cd ..
-
-# Даём Frontend время запуститься
-echo ""
-echo "⏳ Ожидание компиляции React приложения (30-40 секунд)..."
-sleep 35
 
 echo ""
 echo "╔═══════════════════════════════════════════════════════╗"
