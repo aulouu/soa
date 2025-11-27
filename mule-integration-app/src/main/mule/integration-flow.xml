@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+    <!-- 
+    Mule ESB Integration Application
+    Роль: Интеграционная шина между Service2 (REST) и Service1 (SOAP через REST-adapter)
+    Порт: 8081
+    Функции:
+    - Принимает REST запросы от Service2
+    - Проксирует их к REST-adapter (:9090)  
+    - REST-adapter делает трансформацию REST -> SOAP и вызывает Service1
+    - Возвращает результаты обратно в Service2
+    -->
+
+    <!-- HTTP Listener Configuration - принимает запросы от Service2 -->
+    <http:listener-config name="HTTP_Listener_config">
+        <http:listener-connection host="0.0.0.0" port="8081"/>
+    </http:listener-config>
+
+    <!-- HTTP Request Configuration - проксирует к REST-adapter -->
+    <http:request-config name="HTTP_Request_config">
+        <http:request-connection host="localhost" port="9090"/>
+    </http:request-config>
+
+    <!-- Универсальный flow - проксирует все запросы -->
+    <flow name="proxy-all-requests-flow">
+        <http:listener config-ref="HTTP_Listener_config" path="/api/human-beings/*" allowedMethods="GET,POST,PUT,DELETE"/>
+        
+        <logger level="INFO" message="Mule ESB: Received request - Method=#[attributes.method] Path=#[attributes.requestPath] QueryParams=#[attributes.queryParams]"/>
+        
+        <!-- Проксируем запрос к REST-adapter -->
+        <http:request method="#[attributes.method]" config-ref="HTTP_Request_config" path="#[attributes.requestPath]">
+            <http:query-params><![CDATA[#[attributes.queryParams]]]></http:query-params>
+        </http:request>
+        
+        <logger level="INFO" message="Mule ESB: Forwarded to REST-adapter, received response"/>
+    </flow>
+</mule>

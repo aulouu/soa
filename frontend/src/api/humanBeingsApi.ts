@@ -78,7 +78,7 @@ export const filterByNamePrefix = async (
 
 export const getUniqueImpactSpeeds = async (): Promise<number[]> => {
     const response = await apiClient.get<number[]>(
-        `/api/statistics/impact-speeds`
+        `/api/human-beings/statistics/impact-speeds`
     );
     return response.data;
 };

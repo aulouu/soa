@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xsi:schemaLocation="
+        http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+        http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+    <!-- HTTP Listener Configuration - принимает REST запросы от Service2 -->
+    <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config">
+        <http:listener-connection host="0.0.0.0" port="8081"/>
+    </http:listener-config>
+
+    <!-- HTTP Request Configuration - проксирует к REST-adapter (который вызывает SOAP) -->
+    <http:request-config name="HTTP_Request_config" doc:name="HTTP Request config">
+        <http:request-connection host="localhost" port="9090"/>
+    </http:request-config>
+
+    <!-- Flow: getAllHumanBeings -->
+    <flow name="getAllHumanBeings-flow" doc:name="getAllHumanBeings-flow">
+        <http:listener doc:name="GET /api/human-beings" config-ref="HTTP_Listener_config" path="/api/human-beings" allowedMethods="GET"/>
+        
+        <logger level="INFO" doc:name="Log Request" message="Received REST request: GET /api/human-beings with query params: #[attributes.queryParams]"/>
+        
+        <!-- Transform REST query params to SOAP request -->
+        <set-variable value="#[attributes.queryParams]" doc:name="Save Query Params" variableName="queryParams"/>
+        
+        <ee:transform doc:name="REST to SOAP">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+{
+    soap#Envelope: {
+        soap#Body: {
+            ns0#getAllHumanBeings: {
+                id: vars.queryParams.id,
+                name: vars.queryParams.name,
+                hasToothpick: vars.queryParams.hasToothpick,
+                realHero: vars.queryParams.realHero,
+                impactSpeed: vars.queryParams.impactSpeed,
+                weaponType: vars.queryParams.weaponType,
+                mood: vars.queryParams.mood,
+                teamId: vars.queryParams.teamId,
+                createdAfter: vars.queryParams.createdAfter,
+                page: vars.queryParams.page default "0",
+                size: vars.queryParams.size default "10"
+            }
+        }
+    }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        
+        <!-- Call SOAP Service -->
+        <wsc:consume doc:name="Call getAllHumanBeings SOAP" config-ref="Web_Service_Consumer_Config" operation="getAllHumanBeings"/>
+        
+        <logger level="INFO" doc:name="Log SOAP Response" message="SOAP Response received"/>
+        
+        <!-- Transform SOAP response to REST JSON -->
+        <ee:transform doc:name="SOAP to REST">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+{
+    content: payload.soap#Envelope.soap#Body.ns0#getAllHumanBeingsResponse.return.content,
+    totalElements: payload.soap#Envelope.soap#Body.ns0#getAllHumanBeingsResponse.return.totalElements,
+    totalPages: payload.soap#Envelope.soap#Body.ns0#getAllHumanBeingsResponse.return.totalPages,
+    size: payload.soap#Envelope.soap#Body.ns0#getAllHumanBeingsResponse.return.size,
+    number: payload.soap#Envelope.soap#Body.ns0#getAllHumanBeingsResponse.return.number,
+    first: payload.soap#Envelope.soap#Body.ns0#getAllHumanBeingsResponse.return.first,
+    last: payload.soap#Envelope.soap#Body.ns0#getAllHumanBeingsResponse.return.last
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        
+        <logger level="INFO" doc:name="Log REST Response" message="Returning REST response"/>
+    </flow>
+
+    <!-- Flow: getHumanBeingById -->
+    <flow name="getHumanBeingById-flow" doc:name="getHumanBeingById-flow">
+        <http:listener doc:name="GET /api/human-beings/{id}" config-ref="HTTP_Listener_config" path="/api/human-beings/{id}" allowedMethods="GET"/>
+        
+        <logger level="INFO" doc:name="Log Request" message="Received REST request: GET /api/human-beings/#[attributes.uriParams.id]"/>
+        
+        <set-variable value="#[attributes.uriParams.id]" doc:name="Save ID" variableName="humanBeingId"/>
+        
+        <ee:transform doc:name="REST to SOAP">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+{
+    soap#Envelope: {
+        soap#Body: {
+            ns0#getHumanBeingById: {
+                id: vars.humanBeingId
+            }
+        }
+    }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        
+        <wsc:consume doc:name="Call getHumanBeingById SOAP" config-ref="Web_Service_Consumer_Config" operation="getHumanBeingById"/>
+        
+        <ee:transform doc:name="SOAP to REST">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+payload.soap#Envelope.soap#Body.ns0#getHumanBeingByIdResponse.return]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <!-- Flow: createHumanBeing -->
+    <flow name="createHumanBeing-flow" doc:name="createHumanBeing-flow">
+        <http:listener doc:name="POST /api/human-beings" config-ref="HTTP_Listener_config" path="/api/human-beings" allowedMethods="POST"/>
+        
+        <logger level="INFO" doc:name="Log Request" message="Received REST request: POST /api/human-beings"/>
+        
+        <set-variable value="#[payload]" doc:name="Save Request Body" variableName="humanBeingData"/>
+        
+        <ee:transform doc:name="REST to SOAP">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+{
+    soap#Envelope: {
+        soap#Body: {
+            ns0#createHumanBeing: {
+                humanBeing: vars.humanBeingData
+            }
+        }
+    }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        
+        <wsc:consume doc:name="Call createHumanBeing SOAP" config-ref="Web_Service_Consumer_Config" operation="createHumanBeing"/>
+        
+        <ee:transform doc:name="SOAP to REST">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+payload.soap#Envelope.soap#Body.ns0#createHumanBeingResponse.return]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <!-- Flow: updateHumanBeing -->
+    <flow name="updateHumanBeing-flow" doc:name="updateHumanBeing-flow">
+        <http:listener doc:name="PUT /api/human-beings/{id}" config-ref="HTTP_Listener_config" path="/api/human-beings/{id}" allowedMethods="PUT"/>
+        
+        <logger level="INFO" doc:name="Log Request" message="Received REST request: PUT /api/human-beings/#[attributes.uriParams.id]"/>
+        
+        <set-variable value="#[attributes.uriParams.id]" doc:name="Save ID" variableName="humanBeingId"/>
+        <set-variable value="#[payload]" doc:name="Save Request Body" variableName="humanBeingData"/>
+        
+        <ee:transform doc:name="REST to SOAP">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+{
+    soap#Envelope: {
+        soap#Body: {
+            ns0#updateHumanBeing: {
+                id: vars.humanBeingId,
+                humanBeing: vars.humanBeingData
+            }
+        }
+    }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        
+        <wsc:consume doc:name="Call updateHumanBeing SOAP" config-ref="Web_Service_Consumer_Config" operation="updateHumanBeing"/>
+        
+        <ee:transform doc:name="SOAP to REST">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+payload.soap#Envelope.soap#Body.ns0#updateHumanBeingResponse.return]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <!-- Flow: deleteHumanBeing -->
+    <flow name="deleteHumanBeing-flow" doc:name="deleteHumanBeing-flow">
+        <http:listener doc:name="DELETE /api/human-beings/{id}" config-ref="HTTP_Listener_config" path="/api/human-beings/{id}" allowedMethods="DELETE"/>
+        
+        <logger level="INFO" doc:name="Log Request" message="Received REST request: DELETE /api/human-beings/#[attributes.uriParams.id]"/>
+        
+        <set-variable value="#[attributes.uriParams.id]" doc:name="Save ID" variableName="humanBeingId"/>
+        
+        <ee:transform doc:name="REST to SOAP">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+{
+    soap#Envelope: {
+        soap#Body: {
+            ns0#deleteHumanBeing: {
+                id: vars.humanBeingId
+            }
+        }
+    }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        
+        <wsc:consume doc:name="Call deleteHumanBeing SOAP" config-ref="Web_Service_Consumer_Config" operation="deleteHumanBeing"/>
+        
+        <set-payload value="" doc:name="Empty Response"/>
+    </flow>
+
+    <!-- Flow: countByMood -->
+    <flow name="countByMood-flow" doc:name="countByMood-flow">
+        <http:listener doc:name="GET /api/human-beings/statistics/mood-count/{moodValue}" config-ref="HTTP_Listener_config" path="/api/human-beings/statistics/mood-count/{moodValue}" allowedMethods="GET"/>
+        
+        <logger level="INFO" doc:name="Log Request" message="Received REST request: GET /api/human-beings/statistics/mood-count/#[attributes.uriParams.moodValue]"/>
+        
+        <set-variable value="#[attributes.uriParams.moodValue]" doc:name="Save Mood Value" variableName="moodValue"/>
+        
+        <ee:transform doc:name="REST to SOAP">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+{
+    soap#Envelope: {
+        soap#Body: {
+            ns0#countByMood: {
+                moodValue: vars.moodValue
+            }
+        }
+    }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        
+        <wsc:consume doc:name="Call countByMood SOAP" config-ref="Web_Service_Consumer_Config" operation="countByMood"/>
+        
+        <ee:transform doc:name="SOAP to REST">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+{
+    count: payload.soap#Envelope.soap#Body.ns0#countByMoodResponse.return,
+    mood: vars.moodValue match {
+        case "0" -> "SADNESS"
+        case "1" -> "SORROW"
+        case "2" -> "APATHY"
+        case "3" -> "FRENZY"
+        else -> "UNKNOWN"
+    }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <!-- Flow: getUniqueImpactSpeeds -->
+    <flow name="getUniqueImpactSpeeds-flow" doc:name="getUniqueImpactSpeeds-flow">
+        <http:listener doc:name="GET /api/human-beings/statistics/impact-speeds" config-ref="HTTP_Listener_config" path="/api/human-beings/statistics/impact-speeds" allowedMethods="GET"/>
+        
+        <logger level="INFO" doc:name="Log Request" message="Received REST request: GET /api/human-beings/statistics/impact-speeds"/>
+        
+        <ee:transform doc:name="REST to SOAP">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+{
+    soap#Envelope: {
+        soap#Body: {
+            ns0#getUniqueImpactSpeeds: {}
+        }
+    }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        
+        <wsc:consume doc:name="Call getUniqueImpactSpeeds SOAP" config-ref="Web_Service_Consumer_Config" operation="getUniqueImpactSpeeds"/>
+        
+        <ee:transform doc:name="SOAP to REST">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+payload.soap#Envelope.soap#Body.ns0#getUniqueImpactSpeedsResponse.return]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+
+    <!-- Flow: countByNameStartsWith -->
+    <flow name="countByNameStartsWith-flow" doc:name="countByNameStartsWith-flow">
+        <http:listener doc:name="GET /api/human-beings/statistics/name/starts-with/{prefix}" config-ref="HTTP_Listener_config" path="/api/human-beings/statistics/name/starts-with/{prefix}" allowedMethods="GET"/>
+        
+        <logger level="INFO" doc:name="Log Request" message="Received REST request: GET /api/human-beings/statistics/name/starts-with/#[attributes.uriParams.prefix]"/>
+        
+        <set-variable value="#[attributes.uriParams.prefix]" doc:name="Save Prefix" variableName="prefix"/>
+        
+        <ee:transform doc:name="REST to SOAP">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+{
+    soap#Envelope: {
+        soap#Body: {
+            ns0#countByNameStartsWith: {
+                prefix: vars.prefix
+            }
+        }
+    }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        
+        <wsc:consume doc:name="Call countByNameStartsWith SOAP" config-ref="Web_Service_Consumer_Config" operation="countByNameStartsWith"/>
+        
+        <ee:transform doc:name="SOAP to REST">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+ns soap http://schemas.xmlsoap.org/soap/envelope/
+ns ns0 http://soap.service1.soa.itmo/
+---
+{
+    count: payload.soap#Envelope.soap#Body.ns0#countByNameStartsWithResponse.return,
+    prefix: vars.prefix
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+    </flow>
+</mule>

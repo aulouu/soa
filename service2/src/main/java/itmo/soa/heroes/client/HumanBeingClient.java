@@ -8,12 +8,13 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Feign клиент для вызова human-beings-service
- * Использует Ribbon для балансировки нагрузки
- * Сервис обнаруживается через Eureka/Consul
+ * ОБНОВЛЕНО ДЛЯ LAB4: Теперь вызывает Mule ESB вместо прямого вызова Service1
+ * Mule ESB (порт 8081) играет роль интеграционной шины:
+ * Service2 -> Mule ESB (:8081) -> REST-adapter (:9090) -> SOAP Service1 (:8082)
  */
 @FeignClient(
   name = "human-beings-service",
-  url = "http://localhost:8082/service1-web",
+  url = "http://localhost:8081",
   path = "/api/human-beings"
 )
 public interface HumanBeingClient {

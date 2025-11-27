@@ -15,6 +15,7 @@
 
     <modules>
         <module>service1-ejb</module>
+        <module>service1-soap</module>
         <module>service1-web</module>
         <module>service1-eureka-client</module>
     </modules>
