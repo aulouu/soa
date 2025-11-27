@@ -50,3 +50,24 @@ consul
 target/
 logs/
 wildfly-*/
+
+# === LAB4 ADDITIONS ===
+# Mule Runtime (очень большой ~500MB+)
+mule-runtime/mule-standalone-*/
+mule-runtime/mule/
+mule-runtime/*.tar.gz
+mule-runtime/*.zip
+
+# Mule приложения
+mule-integration-app/target/
+mule-integration-app/.mule/
+
+# REST Adapter
+service1-rest-adapter/target/
+service1-rest-adapter/.mvn/
+
+# PID файлы
+*.pid
+
+# Временные файлы
+nohup.out
