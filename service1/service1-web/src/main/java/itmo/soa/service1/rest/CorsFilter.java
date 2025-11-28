@@ -24,13 +24,19 @@ public class CorsFilter implements ContainerResponseFilter {
       .getHeaders()
       .add(
         "Access-Control-Allow-Headers",
-        "origin, content-type, accept, authorization"
+        "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, X-CSRF-TOKEN"
       );
     responseContext
       .getHeaders()
       .add(
         "Access-Control-Allow-Methods",
-        "GET, POST, PUT, DELETE, OPTIONS, HEAD"
+        "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD"
       );
+    responseContext
+      .getHeaders()
+      .add("Access-Control-Max-Age", "3600");
+    responseContext
+      .getHeaders()
+      .add("Access-Control-Expose-Headers", "*");
   }
 }

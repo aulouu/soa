@@ -24,10 +24,11 @@ public class CorsConfig {
     CorsConfiguration config = new CorsConfiguration();
 
     // Разрешаем все источники для работы через Cloudflare Tunnel и локальной разработки
+    // ВАЖНО: когда allowCredentials=false, можно использовать "*" для origins
     config.setAllowCredentials(false);
-    config.addAllowedOrigin("*");
-    config.addAllowedHeader("*");
-    config.addAllowedMethod("*");
+    config.setAllowedOrigins(Arrays.asList("*"));
+    config.setAllowedHeaders(Arrays.asList("*"));
+    config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"));
     config.setMaxAge(3600L);
     config.setExposedHeaders(Arrays.asList("*"));
 

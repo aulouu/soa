@@ -10,27 +10,27 @@
     </http:request-config>     <!-- Универсальный flow - проксирует все запросы -->
     <flow name="proxy-all-requests-flow">
         <http:listener config-ref="HTTP_Listener_config" path="/api/human-beings/*"
-                       allowedMethods="GET,POST,PUT,DELETE,OPTIONS">
-            <http:response>
+                       allowedMethods="GET,POST,PUT,DELETE,PATCH,OPTIONS,HEAD">
+            <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers><![CDATA[#[output application/java
 ---
 {
     "Access-Control-Allow-Origin" : "*",
     "Access-Control-Allow-Methods" : "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD",
-    "Access-Control-Allow-Headers" : "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control",
+    "Access-Control-Allow-Headers" : "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, X-CSRF-TOKEN",
     "Access-Control-Max-Age" : "3600",
     "Access-Control-Allow-Credentials" : "false",
     "Access-Control-Expose-Headers" : "*"
 }]]]></http:headers>
             </http:response>
-            <http:error-response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
                 <http:body><![CDATA[#[payload]]]></http:body>
                 <http:headers><![CDATA[#[output application/java
 ---
 {
     "Access-Control-Allow-Origin" : "*",
     "Access-Control-Allow-Methods" : "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD",
-    "Access-Control-Allow-Headers" : "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control",
+    "Access-Control-Allow-Headers" : "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, X-CSRF-TOKEN",
     "Access-Control-Max-Age" : "3600",
     "Access-Control-Allow-Credentials" : "false",
     "Access-Control-Expose-Headers" : "*"

@@ -29,15 +29,9 @@ public class CorsPreFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletResponse response = ctx.getResponse();
         
-        // Получаем Origin из запроса
-        String origin = ctx.getRequest().getHeader("Origin");
-        
         // Устанавливаем CORS заголовки для всех запросов
-        if (origin != null && !origin.isEmpty()) {
-            response.setHeader("Access-Control-Allow-Origin", origin);
-        } else {
-            response.setHeader("Access-Control-Allow-Origin", "*");
-        }
+        // Используем "*" для максимальной совместимости
+        response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD");
         response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, X-CSRF-TOKEN");
         response.setHeader("Access-Control-Allow-Credentials", "false");
