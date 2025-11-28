@@ -16,7 +16,8 @@ if [ ! -f "$CONSUL_DIR/consul" ]; then
 fi
 
 # Проверяем, не запущен ли уже Consul
-if pgrep -x "consul" > /dev/null; then
+#if pgrep -x "consul" > /dev/null; then
+if ps -W | grep -q "consul"; then
     echo "Consul is already running"
     exit 0
 fi
@@ -43,7 +44,8 @@ echo "Log file: logs/consul.log"
 sleep 3
 
 # Проверяем статус
-if pgrep -x "consul" > /dev/null; then
+#if pgrep -x "consul" > /dev/null; then
+if ps -W | grep -q "consul"; then
     echo "✓ Consul is running"
     ./consul members
 else

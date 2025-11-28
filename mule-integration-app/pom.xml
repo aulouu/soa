@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
-         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="
+             http://maven.apache.org/POM/4.0.0
+             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>itmo.soa</groupId>
@@ -11,40 +13,58 @@
     <packaging>mule-application</packaging>
 
     <name>Mule Integration Application</name>
-    <description>Mule ESB приложение для интеграции Service1 (SOAP) и Service2 (REST)</description>
+    <description>Integration app for Service1 SOAP and Service2 REST</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <mule.version>4.4.0</mule.version>
-        <mule.maven.plugin.version>3.8.0</mule.maven.plugin.version>
+        <mule.maven.plugin.version>4.4.0</mule.maven.plugin.version>
+        <mule.runtime.version>4.4.0</mule.runtime.version>
     </properties>
 
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>3.2.0</version>
-            </plugin>
-            <plugin>
                 <groupId>org.mule.tools.maven</groupId>
                 <artifactId>mule-maven-plugin</artifactId>
                 <version>${mule.maven.plugin.version}</version>
                 <extensions>true</extensions>
+                <!-- для локального standalone деплоя можно указать конфигурацию -->
+                <configuration>
+                    <standaloneDeployment>
+                        <!-- при необходимости можно указать путь к вашему локальному Mule Runtime -->
+                        <!--<muleHome>${env.MULE_HOME}</muleHome>-->
+                        <skip>false</skip>
+                    </standaloneDeployment>
+                    <!-- Возможность указать версию рунтайма, если нужно -->
+                    <runtimeVersion>${mule.runtime.version}</runtimeVersion>
+                </configuration>
             </plugin>
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>mulesoft-releases</id>
+            <url>https://repository.mulesoft.org/releases/</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>mulesoft-releases</id>
+            <url>https://repository.mulesoft.org/releases/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <!-- Добавляйте зависимости, если используете коннекторы / библиотеки -->
     <dependencies>
-        <!-- Mule HTTP Connector -->
+        <!-- Например, HTTP Connector -->
         <dependency>
             <groupId>org.mule.connectors</groupId>
             <artifactId>mule-http-connector</artifactId>
             <version>1.7.3</version>
             <classifier>mule-plugin</classifier>
         </dependency>
-        
         <!-- Mule Sockets Connector -->
         <dependency>
             <groupId>org.mule.connectors</groupId>
@@ -52,29 +72,7 @@
             <version>1.2.3</version>
             <classifier>mule-plugin</classifier>
         </dependency>
+        <!-- Другие зависимости по необходимости -->
     </dependencies>
 
-    <repositories>
-        <repository>
-            <id>mulesoft-releases</id>
-            <name>MuleSoft Releases Repository</name>
-            <url>https://repository-master.mulesoft.org/nexus/content/repositories/releases</url>
-            <layout>default</layout>
-        </repository>
-        <repository>
-            <id>mulesoft-snapshots</id>
-            <name>MuleSoft Snapshots Repository</name>
-            <url>https://repository-master.mulesoft.org/nexus/content/repositories/snapshots</url>
-            <layout>default</layout>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>mulesoft-releases</id>
-            <name>MuleSoft Releases Repository</name>
-            <url>https://repository-master.mulesoft.org/nexus/content/repositories/releases</url>
-            <layout>default</layout>
-        </pluginRepository>
-    </pluginRepositories>
 </project>

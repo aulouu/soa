@@ -20,9 +20,14 @@ NC='\033[0m'
 MODE="${1:---backend}"
 
 # Функция проверки порта
+#check_port() {
+#    local port=$1
+#    nc -z localhost $port 2>/dev/null
+#    return $?
+#}
 check_port() {
     local port=$1
-    nc -z localhost $port 2>/dev/null
+    (echo > /dev/tcp/127.0.0.1/$port) >/dev/null 2>&1
     return $?
 }
 
@@ -32,7 +37,7 @@ wait_for_service() {
     local port=$2
     local max_attempts=30
     local attempt=1
-    
+
     echo -n "Ожидание $name на порту $port..."
     while [ $attempt -le $max_attempts ]; do
         if check_port $port; then
@@ -50,7 +55,25 @@ wait_for_service() {
 # Функция остановки
 stop_all() {
     echo -e "${RED}🛑 Остановка всех сервисов...${NC}"
-    
+
+    # Останавливаем WildFly (Service1 SOAP) - специальная обработка
+    if [ -f "logs/service1-wildfly.pid" ]; then
+        pid=$(cat logs/service1-wildfly.pid)
+        if ps -p $pid > /dev/null 2>&1; then
+            echo "Stopping WildFly (Service1 SOAP) (PID $pid)..."
+            kill -15 $pid 2>/dev/null || true
+            sleep 2
+            # Если не остановился, принудительно
+            if ps -p $pid > /dev/null 2>&1; then
+                kill -9 $pid 2>/dev/null || true
+            fi
+        fi
+        rm logs/service1-wildfly.pid
+    fi
+    # Дополнительно убиваем все процессы WildFly
+    pkill -9 -f "standalone.sh" 2>/dev/null || true
+    pkill -9 -f "jboss-modules.jar" 2>/dev/null || true
+
     # Останавливаем Mule ESB
     if [ -f "logs/mule.pid" ]; then
         pid=$(cat logs/mule.pid)
@@ -60,7 +83,7 @@ stop_all() {
         fi
         rm logs/mule.pid
     fi
-    
+
     # Останавливаем REST-adapter
     if [ -f "logs/rest-adapter.pid" ]; then
         pid=$(cat logs/rest-adapter.pid)
@@ -70,7 +93,7 @@ stop_all() {
         fi
         rm logs/rest-adapter.pid
     fi
-    
+
     # Останавливаем остальные сервисы
     for pid_file in logs/*.pid; do
         if [ -f "$pid_file" ]; then
@@ -82,11 +105,13 @@ stop_all() {
             rm "$pid_file"
         fi
     done
-    
+
+    # Убиваем процессы по имени
     pkill -9 -f "service1-web.jar" 2>/dev/null || true
     pkill -9 -f "service2-springcloud" 2>/dev/null || true
     pkill -9 -f "mule" 2>/dev/null || true
-    
+    pkill -9 -f "standalone.sh" 2>/dev/null || true
+
     echo -e "${GREEN}✓ Все остановлено${NC}"
     exit 0
 }
@@ -97,7 +122,7 @@ if [ "$MODE" == "--stop" ]; then
 fi
 
 echo -e "${CYAN}╔═══════════════════════════════════════════════════════╗${NC}"
-echo -e "${CYAN}║         Lab4: Запуск с Mule ESB                      ║${NC}"
+echo -e "${CYAN}║         Lab4: Запуск с Mule ESB                       ║${NC}"
 echo -e "${CYAN}╚═══════════════════════════════════════════════════════╝${NC}"
 echo ""
 
@@ -144,7 +169,32 @@ fi
 
 # 5. Service1 SOAP (WildFly)
 echo -e "${BLUE}=== 5/10: Service1 SOAP (WildFly) ===${NC}"
-if ! check_port $SERVICE1_PORT; then
+# Проверяем порт и PID файл
+WILDFLY_RUNNING=false
+if check_port $SERVICE1_PORT; then
+    # Проверяем PID файл
+    if [ -f "logs/service1-wildfly.pid" ]; then
+        pid=$(cat logs/service1-wildfly.pid)
+        if ps -p $pid > /dev/null 2>&1; then
+            WILDFLY_RUNNING=true
+        else
+            # PID файл есть, но процесс не существует - удаляем файл
+            rm -f logs/service1-wildfly.pid
+        fi
+    fi
+fi
+
+if [ "$WILDFLY_RUNNING" = false ]; then
+    # Убеждаемся, что старые процессы убиты
+    if [ -f "logs/service1-wildfly.pid" ]; then
+        old_pid=$(cat logs/service1-wildfly.pid)
+        kill -9 $old_pid 2>/dev/null || true
+        rm -f logs/service1-wildfly.pid
+    fi
+    # Дополнительно убиваем процессы WildFly по имени (если доступно)
+    pkill -9 -f "standalone.sh" 2>/dev/null || true
+    sleep 1
+    
     cd wildfly-33.0.1.Final
     cp ../service1/service1-soap/target/service1-soap.war standalone/deployments/
     cp ../service1/service1-ejb/target/service1-ejb-1.0.0.jar standalone/deployments/
@@ -171,9 +221,10 @@ fi
 # 7. Mule ESB
 echo -e "${BLUE}=== 7/10: Mule ESB ===${NC}"
 if ! check_port $MULE_ESB_PORT; then
-    export JAVA_HOME=$(/usr/libexec/java_home -v 17)
-    cd mule-runtime/mule
-    nohup bin/mule > ../../logs/mule.log 2>&1 &
+    export JAVA_HOME="/c/Program Files/Java/jre1.8.0_471"
+    export PATH="$JAVA_HOME/bin:$PATH"
+    cd mule-runtime/mule-standalone-4.4.0
+    cmd.exe /c "bin\mule.bat" > ../../logs/mule.log 2>&1 &
     echo $! > ../../logs/mule.pid
     cd ../..
     wait_for_service "Mule ESB" $MULE_ESB_PORT
@@ -184,8 +235,10 @@ fi
 # 8. Service2 (Heroes)
 echo -e "${BLUE}=== 8/10: Service2 (Heroes) ===${NC}"
 if ! check_port $SERVICE2_PORT; then
+    export JAVA_HOME="/c/Program Files/Java/jdk-17.0.4"
+    export PATH="$JAVA_HOME/bin:$PATH"
     cd service2
-    nohup java $SERVICE2_MEMORY -jar target/service2-1.0.0.jar --server.port=$SERVICE2_PORT > ../logs/service2.log 2>&1 &
+    nohup java $SERVICE2_MEMORY -jar target/service2-springcloud-1.0.0.jar --server.port=$SERVICE2_PORT > ../logs/service2.log 2>&1 &
     echo $! > ../logs/service2.pid
     cd ..
     wait_for_service "Service2" $SERVICE2_PORT
@@ -196,6 +249,8 @@ fi
 # 9. Zuul Gateway
 echo -e "${BLUE}=== 9/10: Zuul Gateway ===${NC}"
 if ! check_port $ZUUL_GATEWAY_PORT; then
+    export JAVA_HOME="/c/Program Files/Java/jdk-17.0.4"
+    export PATH="$JAVA_HOME/bin:$PATH"
     cd zuul-gateway
     nohup java $ZUUL_GATEWAY_MEMORY -jar target/*.jar > ../logs/zuul-gateway.log 2>&1 &
     echo $! > ../logs/zuul-gateway.pid

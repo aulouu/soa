@@ -1,10 +1,14 @@
 package itmo.soa.heroes.config;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
+
+import java.util.Arrays;
 
 /**
  * CORS конфигурация для Service2 (Heroes Service)
@@ -14,24 +18,23 @@ import org.springframework.web.filter.CorsFilter;
 public class CorsConfig {
 
   @Bean
-  public CorsFilter corsFilter() {
+  public FilterRegistrationBean<CorsFilter> corsFilterRegistration() {
     UrlBasedCorsConfigurationSource source =
       new UrlBasedCorsConfigurationSource();
     CorsConfiguration config = new CorsConfiguration();
 
-    // Разрешаем все источники для работы через Cloudflare Tunnel
+    // Разрешаем все источники для работы через Cloudflare Tunnel и локальной разработки
     config.setAllowCredentials(false);
     config.addAllowedOrigin("*");
     config.addAllowedHeader("*");
-    config.addAllowedMethod("GET");
-    config.addAllowedMethod("POST");
-    config.addAllowedMethod("PUT");
-    config.addAllowedMethod("DELETE");
-    config.addAllowedMethod("PATCH");
-    config.addAllowedMethod("OPTIONS");
+    config.addAllowedMethod("*");
     config.setMaxAge(3600L);
+    config.setExposedHeaders(Arrays.asList("*"));
 
     source.registerCorsConfiguration("/**", config);
-    return new CorsFilter(source);
+    
+    FilterRegistrationBean<CorsFilter> bean = new FilterRegistrationBean<>(new CorsFilter(source));
+    bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+    return bean;
   }
 }

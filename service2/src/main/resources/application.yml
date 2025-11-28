@@ -1,7 +1,6 @@
 server:
-  port: ${SERVER_PORT:8091}
+  port: 8091
   # SSL отключен - termination на Gateway
-  # Порт может быть переопределён через -DSERVER_PORT=...
 
 spring:
   application:

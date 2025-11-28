@@ -16,7 +16,7 @@ public class CorsPreFilter extends ZuulFilter {
 
     @Override
     public int filterOrder() {
-        return 0;
+        return -100; // Выполняется раньше других фильтров
     }
 
     @Override
@@ -29,15 +29,26 @@ public class CorsPreFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletResponse response = ctx.getResponse();
         
-        response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
-        response.setHeader("Access-Control-Allow-Headers", "*");
+        // Получаем Origin из запроса
+        String origin = ctx.getRequest().getHeader("Origin");
+        
+        // Устанавливаем CORS заголовки для всех запросов
+        if (origin != null && !origin.isEmpty()) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+        } else {
+            response.setHeader("Access-Control-Allow-Origin", "*");
+        }
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD");
+        response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, X-CSRF-TOKEN");
+        response.setHeader("Access-Control-Allow-Credentials", "false");
         response.setHeader("Access-Control-Max-Age", "3600");
+        response.setHeader("Access-Control-Expose-Headers", "*");
         
         // Обработка OPTIONS preflight запросов
         if ("OPTIONS".equals(ctx.getRequest().getMethod())) {
-            response.setStatus(200);
+            response.setStatus(HttpServletResponse.SC_OK);
             ctx.setSendZuulResponse(false);
+            return null;
         }
         
         return null;
