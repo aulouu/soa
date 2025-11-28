@@ -1,0 +1,20 @@
+{
+  "configs": [
+    "integration-flow.xml"
+  ],
+  "redeploymentEnabled": true,
+  "name": "mule-integration-app",
+  "minMuleVersion": "4.4.0",
+  "requiredProduct": "MULE",
+  "classLoaderModelLoaderDescriptor": {
+    "id": "mule",
+    "attributes": {
+      "exportedResources": [],
+      "exportedPackages": []
+    }
+  },
+  "bundleDescriptorLoader": {
+    "id": "mule",
+    "attributes": {}
+  }
+}
