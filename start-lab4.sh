@@ -152,40 +152,40 @@ echo -e "${CYAN}║         Lab4: Запуск с Mule ESB                      
 echo -e "${CYAN}╚═══════════════════════════════════════════════════════╝${NC}"
 echo ""
 
-# Фаза сборки всех проектов
-echo -e "${BLUE}=== Фаза сборки ===${NC}"
-
-# 1. Config Server
-build_maven_project "config-server" "Config Server"
-
-# 2. Eureka Server
-build_maven_project "eureka-server" "Eureka Server"
-
-# 3. Service1 - EJB модуль
-build_maven_project "service1/service1-ejb" "Service1 EJB"
-
-# 4. Service1 - SOAP Web Service
-build_maven_project "service1/service1-soap" "Service1 SOAP"
-
-# 5. Service1 REST-adapter
-build_maven_project "service1-rest-adapter" "Service1 REST-adapter"
-
-# 6. Service2
-build_maven_project "service2" "Service2"
-
-# 7. Zuul Gateway
-build_maven_project "zuul-gateway" "Zuul Gateway"
-
-# 8. Mule Integration App (если есть)
-if [ -d "mule-integration-app" ]; then
-    build_maven_project "mule-integration-app" "Mule Integration App"
-
-    # Копируем JAR в папку apps Mule Runtime
-    echo -e "${YELLOW}📦 Копирование Mule приложения в runtime...${NC}"
-    cp mule-integration-app/target/mule-integration-app-*.jar \
-       mule-runtime/mule-standalone-4.4.0/apps/
-    echo -e "${GREEN}✓ Mule приложение скопировано в apps/${NC}"
-fi
+## Фаза сборки всех проектов
+#echo -e "${BLUE}=== Фаза сборки ===${NC}"
+#
+## 1. Config Server
+#build_maven_project "config-server" "Config Server"
+#
+## 2. Eureka Server
+#build_maven_project "eureka-server" "Eureka Server"
+#
+## 3. Service1 - EJB модуль
+#build_maven_project "service1/service1-ejb" "Service1 EJB"
+#
+## 4. Service1 - SOAP Web Service
+#build_maven_project "service1/service1-soap" "Service1 SOAP"
+#
+## 5. Service1 REST-adapter
+#build_maven_project "service1-rest-adapter" "Service1 REST-adapter"
+#
+## 6. Service2
+#build_maven_project "service2" "Service2"
+#
+## 7. Zuul Gateway
+#build_maven_project "zuul-gateway" "Zuul Gateway"
+#
+## 8. Mule Integration App (если есть)
+#if [ -d "mule-integration-app" ]; then
+#    build_maven_project "mule-integration-app" "Mule Integration App"
+#
+#    # Копируем JAR в папку apps Mule Runtime
+#    echo -e "${YELLOW}📦 Копирование Mule приложения в runtime...${NC}"
+#    cp mule-integration-app/target/mule-integration-app-*.jar \
+#       mule-runtime/mule-standalone-4.4.0/apps/
+#    echo -e "${GREEN}✓ Mule приложение скопировано в apps/${NC}"
+#fi
 
 # Фаза запуска сервисов
 
@@ -285,8 +285,7 @@ if ! check_port $MULE_ESB_PORT; then
     export JAVA_HOME="/c/Program Files/Java/jre1.8.0_471"
     export PATH="$JAVA_HOME/bin:$PATH"
     cd mule-runtime/mule-standalone-4.4.0
-    # Запуск напрямую через Git Bash, чтобы PID был корректным
-    nohup ./bin/mule start > logs/mule-run.log 2>&1 &
+    cmd.exe /c "bin\mule.bat" > ../../logs/mule.log 2>&1 &
     echo $! > ../../logs/mule.pid
     cd ../..
     wait_for_service "Mule ESB" $MULE_ESB_PORT
