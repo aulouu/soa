@@ -72,6 +72,13 @@
             <version>1.2.3</version>
             <classifier>mule-plugin</classifier>
         </dependency>
+<!--        &lt;!&ndash; EE Core (DataWeave) &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.mulesoft.modules</groupId>-->
+<!--            <artifactId>mule-dw-module</artifactId>-->
+<!--            <version>1.0.0</version>-->
+<!--            <classifier>mule-plugin</classifier>-->
+<!--        </dependency>-->
         <!-- Другие зависимости по необходимости -->
     </dependencies>
 

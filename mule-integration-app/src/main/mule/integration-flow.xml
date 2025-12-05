@@ -1,59 +1,128 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<mule xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:http="http://www.mulesoft.org/schema/mule/http"
-      xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd"> <!-- Mule ESB Integration Application Роль: Интеграционная шина между Service2 (REST) и Service1 (SOAP через REST-adapter) Порт: 8081 Функции: - Принимает REST запросы от Service2 - Проксирует их к REST-adapter (:9090) - REST-adapter делает трансформацию REST -> SOAP и вызывает Service1 - Возвращает результаты обратно в Service2 --> <!-- HTTP Listener Configuration - принимает запросы от Service2 -->
+      xsi:schemaLocation="
+          http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+          http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+    <!-- GLOBAL CORS HEADERS (MULE CE) -->
+    <global-property name="corsHeaders"
+                     value="#[
+                        {
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+                            'Access-Control-Allow-Headers': 'Content-Type,Authorization',
+                            'Access-Control-Allow-Credentials': 'true'
+                        }
+                     ]"/>
+
+    <!-- HTTP Listener (8081) -->
     <http:listener-config name="HTTP_Listener_config">
-        <http:listener-connection host="0.0.0.0" port="8081"/>
-    </http:listener-config> <!-- HTTP Request Configuration - проксирует к REST-adapter -->
-    <http:request-config name="HTTP_Request_config">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+
+    <!-- HTTP Client (REST adapter 9090) -->
+    <http:request-config name="REST_Adapter_Config">
         <http:request-connection host="localhost" port="9090"/>
-    </http:request-config>     <!-- Универсальный flow - проксирует все запросы -->
-    <flow name="proxy-all-requests-flow">
-        <http:listener config-ref="HTTP_Listener_config" path="/api/human-beings/*"
-                       allowedMethods="GET,POST,PUT,DELETE,PATCH,OPTIONS,HEAD">
-            <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers><![CDATA[#[output application/java
----
-{
-    "Access-Control-Allow-Origin" : "*",
-    "Access-Control-Allow-Methods" : "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD",
-    "Access-Control-Allow-Headers" : "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, X-CSRF-TOKEN",
-    "Access-Control-Max-Age" : "3600",
-    "Access-Control-Allow-Credentials" : "false",
-    "Access-Control-Expose-Headers" : "*"
-}]]]></http:headers>
+    </http:request-config>
+
+
+    <!-- ===== GET ALL ===== -->
+    <flow name="getAllHumanBeings">
+        <http:listener config-ref="HTTP_Listener_config" path="/api/human-beings" allowedMethods="GET,OPTIONS">
+            <http:response>
+                <http:headers>#[p('corsHeaders')]</http:headers>
             </http:response>
-            <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body><![CDATA[#[payload]]]></http:body>
-                <http:headers><![CDATA[#[output application/java
----
-{
-    "Access-Control-Allow-Origin" : "*",
-    "Access-Control-Allow-Methods" : "GET, POST, PUT, DELETE, PATCH, OPTIONS, HEAD",
-    "Access-Control-Allow-Headers" : "Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, X-CSRF-TOKEN",
-    "Access-Control-Max-Age" : "3600",
-    "Access-Control-Allow-Credentials" : "false",
-    "Access-Control-Expose-Headers" : "*"
-}]]]></http:headers>
-            </http:error-response>
         </http:listener>
-        
-        <logger level="INFO"
-                message="Mule ESB: Received request - Method=#[attributes.method] Path=#[attributes.requestPath] QueryParams=#[attributes.queryParams]"/>
-        
-        <!-- Обработка OPTIONS preflight запросов -->
+
         <choice>
             <when expression="#[attributes.method == 'OPTIONS']">
-                <set-payload value="#['']"/>
+                <set-payload value=""/>
             </when>
             <otherwise>
-                <!-- Проксируем запрос к REST-adapter -->
-                <http:request method="#[attributes.method]" config-ref="HTTP_Request_config"
-                              path="#[attributes.requestPath]">
-                    <http:query-params><![CDATA[#[attributes.queryParams]]]></http:query-params>
+                <http:request method="GET" config-ref="REST_Adapter_Config" path="/api/human-beings">
+                    <http:query-params>#[attributes.queryParams]</http:query-params>
                 </http:request>
-                <logger level="INFO" message="Mule ESB: Forwarded to REST-adapter, received response"/>
             </otherwise>
         </choice>
     </flow>
+
+
+    <!-- ===== CREATE HUMAN ===== -->
+    <flow name="createHumanBeing">
+        <http:listener config-ref="HTTP_Listener_config" path="/api/human-beings" allowedMethods="POST,OPTIONS">
+            <http:response>
+                <http:headers>#[p('corsHeaders')]</http:headers>
+            </http:response>
+        </http:listener>
+
+        <choice>
+            <when expression="#[attributes.method == 'OPTIONS']">
+                <set-payload value=""/>
+            </when>
+            <otherwise>
+
+                <logger message="Incoming POST payload = #[payload]" level="INFO"/>
+
+                <http:request method="POST" config-ref="REST_Adapter_Config" path="/api/human-beings">
+                    <http:body>#[payload]</http:body>
+                    <http:headers>#[{'Content-Type': 'application/json'}]</http:headers>
+                </http:request>
+
+                <logger message="REST-adapter response = #[payload]" level="INFO"/>
+
+            </otherwise>
+        </choice>
+    </flow>
+
+
+    <!-- ===== GET BY ID ===== -->
+    <flow name="getHumanBeingById">
+        <http:listener config-ref="HTTP_Listener_config" path="/api/human-beings/{id}" allowedMethods="GET,OPTIONS">
+            <http:response>
+                <http:headers>#[p('corsHeaders')]</http:headers>
+            </http:response>
+        </http:listener>
+
+        <choice>
+            <when expression="#[attributes.method == 'OPTIONS']">
+                <set-payload value=""/>
+            </when>
+            <otherwise>
+                <http:request method="GET"
+                              config-ref="REST_Adapter_Config"
+                              path="/api/human-beings/#[attributes.uriParams.id]"/>
+            </otherwise>
+        </choice>
+    </flow>
+
+
+    <!-- ===== UPDATE ===== -->
+    <flow name="updateHumanBeing">
+        <http:listener config-ref="HTTP_Listener_config" path="/api/human-beings/{id}" allowedMethods="PUT,OPTIONS">
+            <http:response>
+                <http:headers>#[p('corsHeaders')]</http:headers>
+            </http:response>
+        </http:listener>
+
+        <choice>
+            <when expression="#[attributes.method == 'OPTIONS']">
+                <set-payload value=""/>
+            </when>
+            <otherwise>
+
+                <logger message="Incoming PUT payload = #[payload]" level="INFO"/>
+
+                <http:request method="PUT"
+                              config-ref="REST_Adapter_Config"
+                              path="/api/human-beings/#[attributes.uriParams.id]">
+                    <http:body>#[payload]</http:body>
+                    <http:headers>#[{'Content-Type': 'application/json'}]</http:headers>
+                </http:request>
+
+            </otherwise>
+        </choice>
+    </flow>
+
 </mule>

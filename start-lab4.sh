@@ -20,15 +20,41 @@ NC='\033[0m'
 MODE="${1:---backend}"
 
 # Функция проверки порта
-#check_port() {
-#    local port=$1
-#    nc -z localhost $port 2>/dev/null
-#    return $?
-#}
 check_port() {
     local port=$1
     (echo > /dev/tcp/127.0.0.1/$port) >/dev/null 2>&1
     return $?
+}
+
+# Функция сборки Maven проекта
+build_maven_project() {
+    local project_dir=$1
+    local project_name=$2
+
+    echo -e "${YELLOW}📦 Сборка $project_name...${NC}"
+
+    # Создаем папку logs если её нет
+    mkdir -p "$PROJECT_DIR/logs"
+
+    # Переходим в директорию проекта
+    cd "$project_dir"
+
+    if [ -f "pom.xml" ]; then
+        # Используем абсолютный путь для логов
+        if mvn clean package -DskipTests 2>&1 | tee "$PROJECT_DIR/logs/build-$(basename $project_dir).log"; then
+            echo -e "${GREEN}✓ $project_name собран успешно${NC}"
+            cd "$PROJECT_DIR"
+            return 0
+        else
+            echo -e "${RED}✗ Ошибка сборки $project_name${NC}"
+            cd "$PROJECT_DIR"
+            return 1
+        fi
+    else
+        echo -e "${YELLOW}⚠️  pom.xml не найден в $project_dir${NC}"
+        cd "$PROJECT_DIR"
+        return 1
+    fi
 }
 
 # Функция ожидания запуска сервиса
@@ -126,6 +152,43 @@ echo -e "${CYAN}║         Lab4: Запуск с Mule ESB                      
 echo -e "${CYAN}╚═══════════════════════════════════════════════════════╝${NC}"
 echo ""
 
+# Фаза сборки всех проектов
+echo -e "${BLUE}=== Фаза сборки ===${NC}"
+
+# 1. Config Server
+build_maven_project "config-server" "Config Server"
+
+# 2. Eureka Server
+build_maven_project "eureka-server" "Eureka Server"
+
+# 3. Service1 - EJB модуль
+build_maven_project "service1/service1-ejb" "Service1 EJB"
+
+# 4. Service1 - SOAP Web Service
+build_maven_project "service1/service1-soap" "Service1 SOAP"
+
+# 5. Service1 REST-adapter
+build_maven_project "service1-rest-adapter" "Service1 REST-adapter"
+
+# 6. Service2
+build_maven_project "service2" "Service2"
+
+# 7. Zuul Gateway
+build_maven_project "zuul-gateway" "Zuul Gateway"
+
+# 8. Mule Integration App (если есть)
+if [ -d "mule-integration-app" ]; then
+    build_maven_project "mule-integration-app" "Mule Integration App"
+
+    # Копируем JAR в папку apps Mule Runtime
+    echo -e "${YELLOW}📦 Копирование Mule приложения в runtime...${NC}"
+    cp mule-integration-app/target/mule-integration-app-*.jar \
+       mule-runtime/mule-standalone-4.4.0/apps/
+    echo -e "${GREEN}✓ Mule приложение скопировано в apps/${NC}"
+fi
+
+# Фаза запуска сервисов
+
 # 1. Consul
 echo -e "${BLUE}=== 1/10: Consul ===${NC}"
 if ! check_port $CONSUL_PORT; then
@@ -172,13 +235,11 @@ echo -e "${BLUE}=== 5/10: Service1 SOAP (WildFly) ===${NC}"
 # Проверяем порт и PID файл
 WILDFLY_RUNNING=false
 if check_port $SERVICE1_PORT; then
-    # Проверяем PID файл
     if [ -f "logs/service1-wildfly.pid" ]; then
         pid=$(cat logs/service1-wildfly.pid)
         if ps -p $pid > /dev/null 2>&1; then
             WILDFLY_RUNNING=true
         else
-            # PID файл есть, но процесс не существует - удаляем файл
             rm -f logs/service1-wildfly.pid
         fi
     fi
@@ -191,11 +252,11 @@ if [ "$WILDFLY_RUNNING" = false ]; then
         kill -9 $old_pid 2>/dev/null || true
         rm -f logs/service1-wildfly.pid
     fi
-    # Дополнительно убиваем процессы WildFly по имени (если доступно)
     pkill -9 -f "standalone.sh" 2>/dev/null || true
     sleep 1
-    
+
     cd wildfly-33.0.1.Final
+    # Копируем собранные артефакты
     cp ../service1/service1-soap/target/service1-soap.war standalone/deployments/
     cp ../service1/service1-ejb/target/service1-ejb-1.0.0.jar standalone/deployments/
     nohup bin/standalone.sh -Djboss.http.port=$SERVICE1_PORT > ../logs/service1-wildfly.log 2>&1 &
@@ -218,13 +279,14 @@ else
     echo -e "${YELLOW}✓ Уже запущен${NC}"
 fi
 
-# 7. Mule ESB
+# 7. Mule ESB (Community Edition)
 echo -e "${BLUE}=== 7/10: Mule ESB ===${NC}"
 if ! check_port $MULE_ESB_PORT; then
     export JAVA_HOME="/c/Program Files/Java/jre1.8.0_471"
     export PATH="$JAVA_HOME/bin:$PATH"
     cd mule-runtime/mule-standalone-4.4.0
-    cmd.exe /c "bin\mule.bat" > ../../logs/mule.log 2>&1 &
+    # Запуск напрямую через Git Bash, чтобы PID был корректным
+    nohup ./bin/mule start > logs/mule-run.log 2>&1 &
     echo $! > ../../logs/mule.pid
     cd ../..
     wait_for_service "Mule ESB" $MULE_ESB_PORT
@@ -264,10 +326,17 @@ fi
 if [ "$MODE" == "--dev" ] || [ "$MODE" == "--build" ]; then
     echo -e "${BLUE}=== 10/10: Frontend ===${NC}"
     cd frontend
+
+    # Сборка фронтенда если требуется
+    if [ "$MODE" == "--build" ]; then
+        echo -e "${YELLOW}📦 Сборка фронтенда...${NC}"
+        npm run build
+    fi
+
     if [ "$MODE" == "--dev" ]; then
         nohup npm start > ../logs/frontend.log 2>&1 &
     else
-        npm run build && npx serve -s build -l $FRONTEND_PORT > ../logs/frontend.log 2>&1 &
+        npx serve -s build -l $FRONTEND_PORT > ../logs/frontend.log 2>&1 &
     fi
     echo $! > ../logs/frontend.pid
     cd ..
