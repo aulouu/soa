@@ -8,8 +8,15 @@ spring:
 # SOAP Service URL
 soap:
   service:
-    url: ${SOAP_SERVICE_URL:http://localhost:8082/service1-soap/HumanBeingService}
+    url: http://localhost:8082/service1-soap/HumanBeingService
+
+  connection:
+    timeout: 10000
+
+  request:
+    timeout: 10000
 
 logging:
   level:
-    itmo.soa.adapter: INFO
+    itmo.soa.adapter.client.SoapClientService: INFO
+    org.apache.cxf: WARN

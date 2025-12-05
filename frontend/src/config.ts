@@ -2,7 +2,7 @@
 // Эти значения генерируются из config.env при запуске скрипта generate-configs.sh
 
 // В production все запросы идут через Zuul Gateway
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8081';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8083';
 
 export const config = {
     // Base URL для всех API запросов (Zuul Gateway)

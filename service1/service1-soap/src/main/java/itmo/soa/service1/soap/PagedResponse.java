@@ -1,6 +1,6 @@
 package itmo.soa.service1.soap;
 
-import itmo.soa.service1.model.HumanBeing;
+import itmo.soa.service1.soap.dto.HumanBeingDTO;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -11,36 +11,36 @@ import java.util.List;
 /**
  * Обертка для пагинированного ответа в SOAP
  */
-@XmlRootElement(name = "PagedResponse")
+@XmlRootElement(name = "PagedResponse", namespace = "http://soap.service1.soa.itmo/")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class PagedResponse implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    @XmlElement
-    private List<HumanBeing> content;
-    
-    @XmlElement
+    @XmlElement(namespace = "http://soap.service1.soa.itmo/")
+    private List<HumanBeingDTO> content;
+
+    @XmlElement(namespace = "http://soap.service1.soa.itmo/")
     private long totalElements;
-    
-    @XmlElement
+
+    @XmlElement(namespace = "http://soap.service1.soa.itmo/")
     private long totalPages;
-    
-    @XmlElement
+
+    @XmlElement(namespace = "http://soap.service1.soa.itmo/")
     private int size;
-    
-    @XmlElement
+
+    @XmlElement(namespace = "http://soap.service1.soa.itmo/")
     private int number;
-    
-    @XmlElement
+
+    @XmlElement(namespace = "http://soap.service1.soa.itmo/")
     private boolean first;
-    
-    @XmlElement
+
+    @XmlElement(namespace = "http://soap.service1.soa.itmo/")
     private boolean last;
 
     public PagedResponse() {}
 
-    public PagedResponse(List<HumanBeing> content, long totalElements, long totalPages, 
-                        int size, int number, boolean first, boolean last) {
+    public PagedResponse(List<HumanBeingDTO> content, long totalElements, long totalPages,
+                         int size, int number, boolean first, boolean last) {
         this.content = content;
         this.totalElements = totalElements;
         this.totalPages = totalPages;
@@ -51,8 +51,8 @@ public class PagedResponse implements Serializable {
     }
 
     // Getters and Setters
-    public List<HumanBeing> getContent() { return content; }
-    public void setContent(List<HumanBeing> content) { this.content = content; }
+    public List<HumanBeingDTO> getContent() { return content; }
+    public void setContent(List<HumanBeingDTO> content) { this.content = content; }
 
     public long getTotalElements() { return totalElements; }
     public void setTotalElements(long totalElements) { this.totalElements = totalElements; }

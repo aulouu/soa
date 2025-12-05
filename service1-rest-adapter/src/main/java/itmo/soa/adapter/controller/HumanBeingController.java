@@ -1,37 +1,23 @@
-package itmo.soa.adapter.controller;
+package itmo.soa.adapter.rest.controller;
 
-import itmo.soa.adapter.client.SoapClientService;
-import itmo.soa.adapter.model.HumanBeingDTO;
-import itmo.soa.adapter.model.PagedResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import itmo.soa.adapter.rest.HumanBeingSoapClient;
+import itmo.soa.adapter.soap.generated.*;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 
-/**
- * REST контроллер - прослойка между REST API и SOAP сервисом
- * Полностью совместим с API Service1
- */
 @RestController
 @RequestMapping("/api/human-beings")
-@CrossOrigin(origins = "*")
 public class HumanBeingController {
 
-    private static final Logger log = Logger.getLogger(HumanBeingController.class.getName());
+    private final HumanBeingSoapClient soapClient;
 
-    private final SoapClientService soapClient;
-
-    @Autowired
-    public HumanBeingController(SoapClientService soapClient) {
-        this.soapClient = soapClient;
+    public HumanBeingController() {
+        this.soapClient = new HumanBeingSoapClient();
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getAllHumanBeings(
+    public PagedResponse getAllHumanBeings(
             @RequestParam(required = false) Long id,
             @RequestParam(required = false) String name,
             @RequestParam(required = false) Boolean hasToothpick,
@@ -43,95 +29,46 @@ public class HumanBeingController {
             @RequestParam(required = false) String createdAfter,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        
-        // log.info("REST getAllHumanBeings called, forwarding to SOAP");
-        
-        PagedResponseDTO response = soapClient.getAllHumanBeings(
-            id, name, hasToothpick, realHero, impactSpeed, 
-            weaponType, mood, teamId, createdAfter, page, size
+
+        return soapClient.getService().getAllHumanBeings(
+                id, name, hasToothpick, realHero, impactSpeed,
+                weaponType, mood, teamId, createdAfter, page, size
         );
-        
-        // Преобразуем в формат который ожидает фронтенд
-        Map<String, Object> result = new HashMap<>();
-        result.put("content", response.getContent());
-        result.put("totalElements", response.getTotalElements());
-        result.put("totalPages", response.getTotalPages());
-        result.put("size", response.getSize());
-        result.put("number", response.getNumber());
-        result.put("first", response.isFirst());
-        result.put("last", response.isLast());
-        
-        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<HumanBeingDTO> getHumanBeingById(@PathVariable Long id) {
-        // log.info("REST getHumanBeingById called with id: {}, forwarding to SOAP", id);
-        HumanBeingDTO dto = soapClient.getHumanBeingById(id);
-        return ResponseEntity.ok(dto);
+    public HumanBeingDTO getHumanBeingById(@PathVariable Long id) {
+        return soapClient.getService().getHumanBeingById(id);
     }
 
     @PostMapping
-    public ResponseEntity<HumanBeingDTO> createHumanBeing(@RequestBody HumanBeingDTO dto) {
-        // log.info("REST createHumanBeing called, forwarding to SOAP");
-        HumanBeingDTO created = soapClient.createHumanBeing(dto);
-        return ResponseEntity.ok(created);
+    public HumanBeingDTO createHumanBeing(@RequestBody HumanBeingDTO humanBeingDTO) {
+        return soapClient.getService().createHumanBeing(humanBeingDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HumanBeingDTO> updateHumanBeing(
-            @PathVariable Long id,
-            @RequestBody HumanBeingDTO dto) {
-        // log.info("REST updateHumanBeing called with id: {}, forwarding to SOAP", id);
-        HumanBeingDTO updated = soapClient.updateHumanBeing(id, dto);
-        return ResponseEntity.ok(updated);
+    public HumanBeingDTO updateHumanBeing(@PathVariable Long id,
+                                          @RequestBody HumanBeingDTO humanBeingDTO) {
+        return soapClient.getService().updateHumanBeing(id, humanBeingDTO);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHumanBeing(@PathVariable Long id) {
-        // log.info("REST deleteHumanBeing called with id: {}, forwarding to SOAP", id);
-        soapClient.deleteHumanBeing(id);
-        return ResponseEntity.noContent().build();
+    public void deleteHumanBeing(@PathVariable Long id) {
+        soapClient.getService().deleteHumanBeing(id);
     }
 
     @GetMapping("/statistics/mood-count/{moodValue}")
-    public ResponseEntity<Map<String, Object>> countByMood(@PathVariable int moodValue) {
-        // log.info("REST countByMood called with value: {}, forwarding to SOAP", moodValue);
-        long count = soapClient.countByMood(moodValue);
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("count", count);
-        result.put("mood", convertMoodValue(moodValue));
-        
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/statistics/impact-speeds")
-    public ResponseEntity<List<Integer>> getUniqueImpactSpeeds() {
-        // log.info("REST getUniqueImpactSpeeds called, forwarding to SOAP");
-        List<Integer> speeds = soapClient.getUniqueImpactSpeeds();
-        return ResponseEntity.ok(speeds);
+    public long countByMood(@PathVariable int moodValue) {
+        return soapClient.getService().countByMood(moodValue);
     }
 
     @GetMapping("/statistics/name/starts-with/{prefix}")
-    public ResponseEntity<Map<String, Object>> countByNameStartsWith(@PathVariable String prefix) {
-        // log.info("REST countByNameStartsWith called with prefix: {}, forwarding to SOAP", prefix);
-        long count = soapClient.countByNameStartsWith(prefix);
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("count", count);
-        result.put("prefix", prefix);
-        
-        return ResponseEntity.ok(result);
+    public long countByNameStartsWith(@PathVariable String prefix) {
+        return soapClient.getService().countByNameStartsWith(prefix);
     }
 
-    private String convertMoodValue(int value) {
-        switch (value) {
-            case 0: return "SADNESS";
-            case 1: return "SORROW";
-            case 2: return "APATHY";
-            case 3: return "FRENZY";
-            default: return "UNKNOWN";
-        }
+    @GetMapping("/statistics/impact-speeds")
+    public List<Integer> getUniqueImpactSpeeds() {
+        return soapClient.getService().getUniqueImpactSpeeds();
     }
 }
