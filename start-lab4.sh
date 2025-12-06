@@ -26,64 +26,6 @@ check_port() {
     return $?
 }
 
-## Функция для принудительной очистки портов
-#cleanup_ports() {
-#    echo -e "${YELLOW}🧹 Очистка занятых портов...${NC}"
-#
-#    # Список портов для очистки
-#    local ports_to_clean=(8080 8082 8084 8091 8083 9090 8888 8761 8500 9990 9991 8443 8445)
-#
-#    for port in "${ports_to_clean[@]}"; do
-#        if check_port $port; then
-#            echo "Порт $port занят, поиск процесса..."
-#
-#            # Для Windows используем netstat для поиска PID
-#            local pid=$(netstat -ano 2>/dev/null | grep ":$port" | awk '{print $5}' | head -1)
-#
-#            # Альтернативный способ для Windows
-#            if [ -z "$pid" ]; then
-#                pid=$(netstat -ano 2>/dev/null | findstr ":$port" | awk '{print $5}' | head -1)
-#            fi
-#
-#            if [ ! -z "$pid" ]; then
-#                echo "Убиваем процесс $pid на порту $port"
-#                taskkill /PID $pid /F 2>/dev/null || kill -9 $pid 2>/dev/null || true
-#            else
-#                echo "Не удалось найти PID для порта $port, пробуем по имени..."
-#                # Убиваем процессы по имени для известных портов
-#                case $port in
-#                    8080)
-#                        pkill -9 -f "zuul-gateway" 2>/dev/null || true
-#                        pkill -9 -f "gateway" 2>/dev/null || true
-#                        ;;
-#                    8083|9090)
-#                        pkill -9 -f "mule" 2>/dev/null || true
-#                        ;;
-#                    8091)
-#                        pkill -9 -f "service2" 2>/dev/null || true
-#                        pkill -9 -f "springcloud" 2>/dev/null || true
-#                        ;;
-#                    8082|8084)
-#                        pkill -9 -f "wildfly" 2>/dev/null || true
-#                        pkill -9 -f "jboss" 2>/dev/null || true
-#                        pkill -9 -f "standalone.sh" 2>/dev/null || true
-#                        ;;
-#                esac
-#            fi
-#        fi
-#    done
-#
-#    # Дополнительно: убиваем все Java процессы для Zuul и Gateway
-#    echo "Остановка Zuul/Gateway процессов..."
-#    pkill -9 -f "zuul" 2>/dev/null || true
-#    pkill -9 -f "gateway" 2>/dev/null || true
-#
-#    # Ждем освобождения портов
-#    sleep 3
-#
-#    echo -e "${GREEN}✓ Очистка портов завершена${NC}"
-#}
-
 # Функция для принудительной очистки портов Windows
 cleanup_ports() {
     echo -e "${YELLOW}🧹 Очистка занятых портов...${NC}"
@@ -205,70 +147,6 @@ wait_for_service() {
     echo -e " ${RED}✗ Timeout${NC}"
     return 1
 }
-
-# Функция остановки
-#stop_all() {
-#    echo -e "${RED}🛑 Остановка всех сервисов...${NC}"
-#
-#    # Останавливаем WildFly (Service1 SOAP) - специальная обработка
-#    if [ -f "logs/service1-wildfly.pid" ]; then
-#        pid=$(cat logs/service1-wildfly.pid)
-#        if ps -p $pid > /dev/null 2>&1; then
-#            echo "Stopping WildFly (Service1 SOAP) (PID $pid)..."
-#            kill -15 $pid 2>/dev/null || true
-#            sleep 2
-#            # Если не остановился, принудительно
-#            if ps -p $pid > /dev/null 2>&1; then
-#                kill -9 $pid 2>/dev/null || true
-#            fi
-#        fi
-#        rm logs/service1-wildfly.pid
-#    fi
-#    # Дополнительно убиваем все процессы WildFly
-#    pkill -9 -f "standalone.sh" 2>/dev/null || true
-#    pkill -9 -f "jboss-modules.jar" 2>/dev/null || true
-#
-#    # Останавливаем Mule ESB
-#    if [ -f "logs/mule.pid" ]; then
-#        pid=$(cat logs/mule.pid)
-#        if ps -p $pid > /dev/null 2>&1; then
-#            echo "Stopping Mule ESB (PID $pid)..."
-#            kill $pid 2>/dev/null || true
-#        fi
-#        rm logs/mule.pid
-#    fi
-#
-#    # Останавливаем REST-adapter
-#    if [ -f "logs/rest-adapter.pid" ]; then
-#        pid=$(cat logs/rest-adapter.pid)
-#        if ps -p $pid > /dev/null 2>&1; then
-#            echo "Stopping REST-adapter (PID $pid)..."
-#            kill $pid 2>/dev/null || true
-#        fi
-#        rm logs/rest-adapter.pid
-#    fi
-#
-#    # Останавливаем остальные сервисы
-#    for pid_file in logs/*.pid; do
-#        if [ -f "$pid_file" ]; then
-#            pid=$(cat "$pid_file")
-#            if ps -p $pid > /dev/null 2>&1; then
-#                echo "Killing PID $pid from $pid_file..."
-#                kill -9 $pid 2>/dev/null || true
-#            fi
-#            rm "$pid_file"
-#        fi
-#    done
-#
-#    # Убиваем процессы по имени
-#    pkill -9 -f "service1-web.jar" 2>/dev/null || true
-#    pkill -9 -f "service2-springcloud" 2>/dev/null || true
-#    pkill -9 -f "mule" 2>/dev/null || true
-#    pkill -9 -f "standalone.sh" 2>/dev/null || true
-#
-#    echo -e "${GREEN}✓ Все остановлено${NC}"
-#    exit 0
-#}
 
 # Обработка флага --stop
 if [ "$MODE" == "--stop" ]; then

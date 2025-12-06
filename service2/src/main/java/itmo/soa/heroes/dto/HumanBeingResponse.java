@@ -1,5 +1,6 @@
 package itmo.soa.heroes.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import itmo.soa.heroes.model.*;
 import lombok.Data;
 
@@ -8,7 +9,8 @@ public class HumanBeingResponse {
     private Long id;
     private String name;
     private Coordinates coordinates;
-    private String creationDate;
+    @JsonProperty("creationDate")
+    private Object creationDate;
     private Boolean realHero;
     private Boolean hasToothpick;
     private Integer impactSpeed;

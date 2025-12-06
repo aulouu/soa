@@ -155,32 +155,40 @@ const HumanBeingsPage: React.FC = () => {
 
   const handleCountByMood = async (mood: string) => {
     try {
-      const result = await humanBeingsApi.countByMood(parseInt(mood, 10));
+      const count = await humanBeingsApi.countByMood(parseInt(mood, 10));
+      const moodName = ["SADNESS", "SORROW", "APATHY", "FRENZY"][parseInt(mood, 10)];
+
       setOperationResult({
         title: "Подсчет по настроению",
         content: (
-          <Typography>
-            Найдено <strong>{result.count}</strong> записей с настроением{" "}
-            <strong>{result.mood}</strong>.
-          </Typography>
+            <Typography>
+              Найдено <strong>{count}</strong> записей с настроением{" "}
+              <strong>{moodName}</strong>.
+            </Typography>
         ),
       });
-    } catch (e) {}
+    } catch (e) {
+      console.error("Ошибка при подсчете по настроению:", e);
+      toast.error("Не удалось выполнить подсчет по настроению");
+    }
   };
 
   const handleFilterByNamePrefix = async (prefix: string) => {
     try {
-      const result = await humanBeingsApi.filterByNamePrefix(prefix);
+      const count = await humanBeingsApi.filterByNamePrefix(prefix);
       setOperationResult({
         title: `Результаты по префиксу "${prefix}"`,
         content: (
-          <Typography>
-            Найдено <strong>{result.count}</strong> записей, чьи имена начинаются с{" "}
-            <strong>"{result.prefix}"</strong>.
-          </Typography>
+            <Typography>
+              Найдено <strong>{count}</strong> записей, чьи имена начинаются с{" "}
+              <strong>"{prefix}"</strong>.
+            </Typography>
         ),
       });
-    } catch (e) {}
+    } catch (e) {
+      console.error("Ошибка при поиске по префиксу:", e);
+      toast.error("Не удалось выполнить поиск по префиксу");
+    }
   };
 
   const handleGetUniqueSpeeds = async () => {
