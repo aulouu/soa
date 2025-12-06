@@ -14,7 +14,7 @@ export const config = {
     
     // Прямые эндпоинты сервисов (для dev/debug)
     service1Direct: process.env.REACT_APP_SERVICE1_URL || 'https://localhost:8082',
-    service2Direct: process.env.REACT_APP_SERVICE2_URL || 'https://localhost:8081',
+    service2Direct: process.env.REACT_APP_SERVICE2_URL || 'https://localhost:8091',
     
     // Использовать Gateway или прямое подключение
     useGateway: process.env.REACT_APP_USE_GATEWAY !== 'false',

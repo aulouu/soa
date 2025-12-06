@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:http="http://www.mulesoft.org/schema/mule/http"
-      xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd"> <!-- Mule ESB Integration Application Роль: Интеграционная шина между Service2 (REST) и Service1 (SOAP через REST-adapter) Порт: 8081 Функции: - Принимает REST запросы от Service2 - Проксирует их к REST-adapter (:9090) - REST-adapter делает трансформацию REST -> SOAP и вызывает Service1 - Возвращает результаты обратно в Service2 --> <!-- HTTP Listener Configuration - принимает запросы от Service2 -->
+      xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd"> <!-- Mule ESB Integration Application Роль: Интеграционная шина между Service2 (REST) и Service1 (SOAP через REST-adapter) Порт: 8083 Функции: - Принимает REST запросы от Service2 - Проксирует их к REST-adapter (:9090) - REST-adapter делает трансформацию REST -> SOAP и вызывает Service1 - Возвращает результаты обратно в Service2 --> <!-- HTTP Listener Configuration - принимает запросы от Service2 -->
     <http:listener-config name="HTTP_Listener_config">
         <http:listener-connection host="0.0.0.0" port="8083"/>
     </http:listener-config> <!-- HTTP Request Configuration - проксирует к REST-adapter -->

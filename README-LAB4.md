@@ -10,7 +10,7 @@ Zuul Gateway (:8080)
     ↓
 Service2 - Heroes (:8091) [REST - Spring Cloud]
     ↓
-🆕 Mule ESB (:8081) [Интеграционная шина]
+🆕 Mule ESB (:8083) [Интеграционная шина]
     ↓
 🆕 REST-adapter (:9090) [REST → SOAP трансляция]
     ↓
@@ -27,7 +27,7 @@ PostgreSQL (:5432)
    - EJB бизнес-логика осталась без изменений
    - WSDL доступен: `http://localhost:8082/service1-soap/HumanBeingService?wsdl`
 
-2. **Добавлен Mule ESB** (порт 8081)
+2. **Добавлен Mule ESB** (порт 8083)
    - Полноценный Mule Runtime Community Edition 4.4.0
    - Играет роль интеграционной шины между Service2 и Service1
    - Принимает REST запросы от Service2
@@ -117,7 +117,7 @@ curl http://localhost:9090/api/human-beings?page=0&size=10
 
 ```bash
 # Mule ESB проксирует к REST-adapter
-curl http://localhost:8081/api/human-beings?page=0&size=10
+curl http://localhost:8083/api/human-beings?page=0&size=10
 ```
 
 ### 4. Проверка Service2 → Mule ESB
@@ -215,7 +215,7 @@ http://localhost:8082/service1-soap/HumanBeingService?wsdl
 **Версия:** Mule Runtime CE 4.4.0
 
 **Компоненты:**
-- HTTP Listener (порт 8081)
+- HTTP Listener (порт 8083)
 - HTTP Request (проксирует к REST-adapter)
 - Logging
 
@@ -262,19 +262,19 @@ Return response
 
 ## 📊 Порты (Lab4)
 
-| Компонент | Порт | Описание |
-|-----------|------|----------|
-| Frontend | 3000 | React приложение |
-| Zuul Gateway | 8080 | API Gateway (HTTPS) |
-| **Mule ESB** | **8081** | 🆕 Интеграционная шина |
-| Service1 SOAP | 8082 | 🆕 SOAP Web Service (WildFly) |
-| Service1 Eureka Proxy | 8089 | Прокси для Service Discovery |
+| Компонент | Порт     | Описание |
+|-----------|----------|----------|
+| Frontend | 3000     | React приложение |
+| Zuul Gateway | 8080     | API Gateway (HTTPS) |
+| **Mule ESB** | **8083** | 🆕 Интеграционная шина |
+| Service1 SOAP | 8082     | 🆕 SOAP Web Service (WildFly) |
+| Service1 Eureka Proxy | 8089     | Прокси для Service Discovery |
 | **REST-adapter** | **9090** | 🆕 REST → SOAP адаптер |
-| Service2 (Heroes) | 8091 | Spring Cloud сервис |
-| Config Server | 8888 | Централизованная конфигурация |
-| Eureka Server | 8761 | Service Registry |
-| Consul | 8500 | Service Discovery + Health |
-| PostgreSQL | 5432 | База данных |
+| Service2 (Heroes) | 8091     | Spring Cloud сервис |
+| Config Server | 8888     | Централизованная конфигурация |
+| Eureka Server | 8761     | Service Registry |
+| Consul | 8500     | Service Discovery + Health |
+| PostgreSQL | 5432     | База данных |
 
 ## 🧪 Тестирование полного flow
 
@@ -293,7 +293,7 @@ curl -X POST http://localhost:8082/service1-soap/HumanBeingService \
 curl "http://localhost:9090/api/human-beings?page=0&size=5"
 
 # 4. Через Mule ESB
-curl "http://localhost:8081/api/human-beings?page=0&size=5"
+curl "http://localhost:8083/api/human-beings?page=0&size=5"
 
 # 5. Через Service2
 curl http://localhost:8091/api/heroes
